@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>EPUB Reader</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pica/9.0.1/pica.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -60,7 +61,7 @@
         .btn {
             background: rgba(255, 255, 255, 0.9);
             color: #ff6b9d;
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: none;
             padding: 5px 10px;
             border-radius: 15px;
             cursor: pointer;
@@ -74,6 +75,11 @@
             background: #fff;
             box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
             transform: translateY(-1px);
+        }
+
+        .btn.active {
+            background: #ff6b9d;
+            color: #fff;
         }
 
         .upload-overlay {
@@ -119,17 +125,6 @@
             color: #999;
             font-size: 1.1em;
             margin: 10px 0;
-        }
-
-        .history-panel {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 15px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 300px;
-            overflow-y: auto;
-            pointer-events: auto;
         }
 
         .url-input-box {
@@ -253,6 +248,7 @@
             white-space: nowrap;
         }
 
+        /* MAIN VIEWER - Background hồng cho TẤT CẢ */
         .main-viewer {
             flex: 1;
             overflow-y: auto;
@@ -261,10 +257,15 @@
             flex-direction: column;
             align-items: center;
             background: #fef6f8;
+            padding: 15px;
         }
 
         .main-viewer::-webkit-scrollbar {
             width: 8px;
+        }
+
+        .main-viewer::-webkit-scrollbar-track {
+            background: #fef6f8;
         }
 
         .main-viewer::-webkit-scrollbar-thumb {
@@ -272,27 +273,43 @@
             border-radius: 4px;
         }
 
-        /* Novel viewer has padding */
-        .main-viewer.novel-mode {
-            padding: 15px;
-        }
-
-        /* Manga viewer no padding */
-        .main-viewer.manga-mode {
-            padding: 0;
-        }
-
-        .content-container {
+        /* NOVEL MODE - có card trắng */
+        .main-viewer.novel-mode .content-container {
             width: 100%;
             max-width: 900px;
         }
 
-        /* === MANGA STYLE - dính liền === */
+        /* MANGA MODE - KHÔNG padding, ảnh dính liền */
+        .main-viewer.manga-mode {
+            padding: 0; /* Không padding */
+            background: #2a2a2a; /* Nền tối cho manga */
+        }
+
+        /* MANGA MODE PC - ảnh giới hạn width, căn giữa */
+        @media (min-width: 769px) {
+            .main-viewer.manga-mode .content-container {
+                width: 100%;
+                max-width: 900px; /* Giới hạn width trên PC */
+                margin: 0 auto;
+            }
+        }
+
+        /* MANGA MODE Mobile - ảnh full width */
+        @media (max-width: 768px) {
+            .main-viewer.manga-mode .content-container {
+                width: 100%;
+                max-width: none;
+            }
+        }
+
+        /* MANGA PAGE - KHÔNG có card, ảnh dính liền */
         .manga-page {
-            background: #fff;
-            margin: 0;
-            padding: 0;
+            background: transparent; /* Không background */
+            margin: 0; /* Không margin, ảnh dính liền */
+            padding: 0; /* Không padding */
             line-height: 0;
+            width: 100%;
+            display: block;
         }
 
         .manga-page img,
@@ -304,7 +321,17 @@
             padding: 0;
         }
 
-        /* === NOVEL STYLE === */
+        .manga-page .placeholder {
+            width: 100%;
+            min-height: 600px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff85a6;
+        }
+
+        /* NOVEL CHAPTER - CÓ card trắng bao quanh */
         .novel-chapter {
             background: #fff;
             color: #333;
@@ -328,17 +355,9 @@
             font-weight: 600;
         }
 
-        .novel-chapter h1 {
-            font-size: 1.8em;
-        }
-
-        .novel-chapter h2 {
-            font-size: 1.4em;
-        }
-
-        .novel-chapter h3 {
-            font-size: 1.2em;
-        }
+        .novel-chapter h1 { font-size: 1.8em; }
+        .novel-chapter h2 { font-size: 1.4em; }
+        .novel-chapter h3 { font-size: 1.2em; }
 
         .novel-chapter p {
             margin-bottom: 1em;
@@ -352,24 +371,15 @@
             display: block;
             margin: 1.5em auto;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .novel-chapter blockquote {
-            border-left: 4px solid #ff85a6;
-            padding-left: 1.5em;
-            margin: 1.5em 0;
-            color: #666;
-            font-style: italic;
+        .novel-chapter a {
+            color: #ff6b9d;
+            cursor: pointer;
         }
 
-        .novel-chapter ul,
-        .novel-chapter ol {
-            margin: 1em 0 1em 2em;
-        }
-
-        .novel-chapter li {
-            margin-bottom: 0.5em;
+        [id] {
+            scroll-margin-top: 80px;
         }
 
         .footer {
@@ -398,6 +408,11 @@
             font-weight: 500;
         }
 
+        .footer-controls {
+            display: flex;
+            gap: 4px;
+        }
+
         .stats {
             position: fixed;
             top: 50px;
@@ -420,19 +435,20 @@
 
         .progress-bar {
             position: fixed;
-            top: 45px;
+            bottom: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: #ffe6f0;
-            z-index: 999;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1001;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #ff6b9d, #ff85a6);
+            background: linear-gradient(90deg, #ff1744, #ff5252);
             width: 0%;
             transition: width 0.3s;
+            box-shadow: 0 0 10px rgba(255, 23, 68, 0.6);
         }
 
         @keyframes spin {
@@ -471,7 +487,6 @@
             <button class="btn" onclick="loadFromUrl()" style="width: 100%; padding: 8px;">Tải từ URL</button>
         </div>
 
-        <div class="history-panel" id="historyPanel" style="display:none;"></div>
         <input type="file" id="epubInput" class="file-input" accept=".epub">
     </div>
 
@@ -480,12 +495,10 @@
         <div class="controls">
             <button class="btn" onclick="toggleSidebar()">📑</button>
             <button class="btn" onclick="toggleStats()">📊</button>
+            <button class="btn" id="saveModeBtn" onclick="toggleSaveMode()" title="💾 Tiết kiệm">💾</button>
+            <button class="btn" id="widthModeBtn" onclick="toggleWidthMode()" title="📐 Width">📐</button>
             <button class="btn" onclick="loadNewFile()">📂</button>
         </div>
-    </div>
-
-    <div class="progress-bar" id="progressBar">
-        <div class="progress-fill" id="progressFill"></div>
     </div>
 
     <div class="stats hidden" id="stats">
@@ -493,6 +506,7 @@
         <div>📚 <span id="statType">-</span></div>
         <div>📏 <span id="statSize">0</span> MB</div>
         <div>💾 <span id="statMemory">0</span> MB</div>
+        <div>🔄 <span id="statLoaded">0</span></div>
     </div>
 
     <div class="viewer-container" id="viewerContainer">
@@ -512,22 +526,37 @@
     </div>
 
     <div class="footer" id="footer">
-        <div class="page-info"><span id="footerLabel">Trang</span> <span id="currentPage">0</span> / <span id="totalPages">0</span></div>
-        <div style="display: flex; gap: 6px;">
+        <div class="page-info">
+            <span id="footerLabel">Trang</span> <span id="currentPage">0</span> / <span id="totalPages">0</span>
+        </div>
+        <div class="footer-controls">
             <button class="btn" onclick="scrollToTop()">⬆️</button>
             <button class="btn" onclick="scrollToBottom()">⬇️</button>
         </div>
     </div>
 
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
     <script>
+        const pica = window.pica();
+        
         let epubZip = null;
         let pages = [];
         let chapters = [];
         let currentPageIndex = 0;
         let loadedImages = new Map();
+        let loadedPagesSet = new Set();
         let isImmersive = false;
-        let epubType = 'manga'; // 'manga' or 'novel'
+        let epubType = 'manga';
         let fileSize = 0;
+        let useLazyLoad = false;
+        let saveMode = false;
+        let fullWidthMode = false; // false = giới hạn width trên PC
+        let imageObserver = null;
+
+        const PRELOAD_RANGE = 4;
 
         const uploadOverlay = document.getElementById('uploadOverlay');
         const fileInput = document.getElementById('epubInput');
@@ -574,6 +603,27 @@
             document.getElementById('viewerContainer').classList.toggle('immersive', isImmersive);
         }
 
+        function toggleSaveMode() {
+            saveMode = !saveMode;
+            document.getElementById('saveModeBtn').classList.toggle('active', saveMode);
+            
+            if (useLazyLoad) {
+                alert('Save mode sẽ áp dụng cho ảnh mới load');
+            }
+        }
+
+        function toggleWidthMode() {
+            fullWidthMode = !fullWidthMode;
+            document.getElementById('widthModeBtn').classList.toggle('active', fullWidthMode);
+            
+            const container = document.getElementById('contentContainer');
+            if (fullWidthMode) {
+                container.style.maxWidth = 'none';
+            } else {
+                container.style.maxWidth = epubType === 'manga' ? '900px' : '900px';
+            }
+        }
+
         async function loadFromUrl() {
             const url = document.getElementById('urlInput').value.trim();
             if (!url) return alert('Vui lòng nhập URL!');
@@ -589,32 +639,26 @@
             }
         }
 
-        // Get text content from HTML string (strip tags)
         function getTextContent(htmlString) {
             const doc = new DOMParser().parseFromString(htmlString, 'text/html');
             return (doc.body.textContent || '').trim();
         }
 
-        // Count words in text
         function countWords(text) {
-            return text.replace(/\s+/g, ' ').length; // Count characters for CJK languages
+            return text.replace(/\s+/g, ' ').length;
         }
 
-        // Detect if EPUB is novel or manga
         async function detectEpubType(spineOrder) {
-            // Method 1: Check file size
             if (fileSize > 30) {
-                console.log('📦 Large file (>30MB) → Manga');
+                console.log('📦 >30MB → Manga');
                 return 'manga';
             }
 
-            // Method 2: Analyze content of first few pages
             let filesWithMuchText = 0;
-            const samplesToCheck = Math.min(10, spineOrder.length); // Check first 10 files
+            const samplesToCheck = Math.min(10, spineOrder.length);
 
             for (let i = 0; i < samplesToCheck; i++) {
                 const page = spineOrder[i];
-                
                 if (!epubZip.file(page.path)) continue;
 
                 try {
@@ -622,24 +666,15 @@
                     const textContent = getTextContent(content);
                     const wordCount = countWords(textContent);
 
-                    console.log(`📄 Page ${i}: ${wordCount} chars`);
-
-                    if (wordCount > 500) {
-                        filesWithMuchText++;
-                    }
-
-                    // If we found 3 files with >500 chars, it's a novel
+                    if (wordCount > 500) filesWithMuchText++;
                     if (filesWithMuchText >= 3) {
-                        console.log('📖 Found 3+ files with >500 chars → Novel');
+                        console.log('📖 3+ files >500 chars → Novel');
                         return 'novel';
                     }
-                } catch (error) {
-                    console.error('Error reading page:', error);
-                }
+                } catch (error) {}
             }
 
-            // Default to manga if not enough text found
-            console.log('🎨 Not enough text content → Manga');
+            console.log('🎨 → Manga');
             return 'manga';
         }
 
@@ -648,32 +683,25 @@
                 uploadOverlay.classList.add('hidden');
                 showLoading();
                 
-                // Get file size
-                fileSize = file.size / (1024 * 1024); // Convert to MB
-                console.log(`📦 File size: ${fileSize.toFixed(2)} MB`);
+                fileSize = file.size / (1024 * 1024);
+                useLazyLoad = fileSize > 150;
                 
                 epubZip = await JSZip.loadAsync(file);
                 
                 const opfPath = await findOpfFile();
                 if (!opfPath) throw new Error('Không tìm thấy file OPF');
 
-                const { spineOrder, manifest } = await parseOpf(opfPath);
+                const { spineOrder } = await parseOpf(opfPath);
                 pages = spineOrder;
                 
-                // Detect type based on content
                 epubType = await detectEpubType(spineOrder);
-                console.log(`✅ Type detected: ${epubType}`);
-                
                 chapters = await parseToc(opfPath);
-                
-                console.log(`📚 ${pages.length} pages, ${chapters.length} chapters`);
                 
                 document.getElementById('bookTitle').textContent = file.name?.replace('.epub', '') || 'EPUB';
                 document.getElementById('totalPages').textContent = pages.length;
                 document.getElementById('statTotal').textContent = pages.length;
                 document.getElementById('statSize').textContent = fileSize.toFixed(1);
                 
-                // Update labels based on type
                 if (epubType === 'novel') {
                     document.getElementById('statLabel').textContent = 'Chương';
                     document.getElementById('footerLabel').textContent = 'Chương';
@@ -699,14 +727,15 @@
             try {
                 const container = await epubZip.file('META-INF/container.xml').async('string');
                 const doc = new DOMParser().parseFromString(container, 'text/xml');
-                return doc.querySelector('rootfile')?.getAttribute('full-path');
-            } catch {
-                let opf = null;
-                epubZip.forEach((path) => {
-                    if (path.endsWith('.opf') && !opf) opf = path;
-                });
-                return opf;
-            }
+                const path = doc.querySelector('rootfile')?.getAttribute('full-path');
+                if (path) return path;
+            } catch {}
+
+            let found = null;
+            epubZip.forEach((path) => {
+                if (path.endsWith('.opf') && !found) found = path;
+            });
+            return found;
         }
 
         async function parseOpf(opfPath) {
@@ -714,26 +743,23 @@
             const doc = new DOMParser().parseFromString(content, 'text/xml');
             const baseDir = opfPath.substring(0, opfPath.lastIndexOf('/') + 1);
             
-            // Parse manifest
             const manifest = {};
             doc.querySelectorAll('manifest item').forEach(item => {
                 const id = item.getAttribute('id');
                 const href = item.getAttribute('href');
-                if (id && href) {
-                    manifest[id] = baseDir + href;
-                }
+                if (id && href) manifest[id] = baseDir + href;
             });
             
-            // Parse spine
             const spineOrder = [];
             doc.querySelectorAll('spine itemref').forEach((itemref, index) => {
                 const idref = itemref.getAttribute('idref');
                 if (idref && manifest[idref]) {
                     spineOrder.push({
-                        index: index,
+                        index,
                         path: manifest[idref],
                         id: idref,
-                        element: null
+                        element: null,
+                        loaded: false
                     });
                 }
             });
@@ -744,50 +770,74 @@
         async function parseToc(opfPath) {
             const baseDir = opfPath.substring(0, opfPath.lastIndexOf('/') + 1);
             
-            const possiblePaths = [
+            const ncxPaths = [
                 baseDir + 'toc.ncx',
                 'toc.ncx',
-                'OEBPS/toc.ncx'
+                'OEBPS/toc.ncx',
+                'EPUB/toc.ncx'
             ];
             
-            for (const path of possiblePaths) {
+            let foundNcx = null;
+            epubZip.forEach((path) => {
+                if (path.endsWith('.ncx') && !foundNcx) foundNcx = path;
+            });
+            if (foundNcx) ncxPaths.push(foundNcx);
+            
+            for (const path of ncxPaths) {
                 if (epubZip.file(path)) {
-                    const content = await epubZip.file(path).async('string');
-                    const doc = new DOMParser().parseFromString(content, 'text/xml');
-                    
-                    const chapters = [];
-                    doc.querySelectorAll('navPoint').forEach(nav => {
-                        const label = nav.querySelector('navLabel text')?.textContent;
-                        const src = nav.querySelector('content')?.getAttribute('src');
+                    try {
+                        const content = await epubZip.file(path).async('string');
+                        const doc = new DOMParser().parseFromString(content, 'text/xml');
                         
-                        if (label && src) {
-                            const tocBaseDir = path.substring(0, path.lastIndexOf('/') + 1);
-                            const fullPath = tocBaseDir + src;
+                        const chapters = [];
+                        doc.querySelectorAll('navPoint').forEach(nav => {
+                            const label = nav.querySelector('navLabel text')?.textContent;
+                            const src = nav.querySelector('content')?.getAttribute('src');
                             
-                            const pageIndex = pages.findIndex(p => p.path === fullPath || p.path.endsWith(src));
-                            
-                            if (pageIndex >= 0) {
-                                chapters.push({
-                                    title: label,
-                                    pageIndex: pageIndex,
-                                    path: fullPath
-                                });
+                            if (label && src) {
+                                const tocDir = path.substring(0, path.lastIndexOf('/') + 1);
+                                const fullPath = resolveEpubPath(tocDir + 'x', src);
+                                const pageIndex = findPageIndexByPath(fullPath);
+                                
+                                if (pageIndex >= 0) {
+                                    chapters.push({
+                                        title: label,
+                                        pageIndex,
+                                        path: fullPath,
+                                        anchor: src.includes('#') ? src.split('#')[1] : null
+                                    });
+                                }
                             }
-                        }
-                    });
-                    
-                    return chapters;
+                        });
+                        
+                        if (chapters.length > 0) return chapters;
+                    } catch (e) {}
                 }
             }
             
             return [];
         }
 
+        function findPageIndexByPath(targetPath) {
+            if (!targetPath) return -1;
+            
+            const clean = targetPath.replace(/^\/+/, '').split('#')[0];
+            
+            let idx = pages.findIndex(p => p.path.replace(/^\/+/, '') === clean);
+            if (idx >= 0) return idx;
+            
+            const filename = clean.split('/').pop();
+            idx = pages.findIndex(p => p.path.split('/').pop() === filename);
+            
+            return idx;
+        }
+
         function resolveEpubPath(basePath, relativePath) {
             if (relativePath.startsWith('http')) return null;
             
+            const path = relativePath.split('#')[0];
             const baseDir = basePath.substring(0, basePath.lastIndexOf('/') + 1);
-            let resolved = baseDir + relativePath;
+            let resolved = baseDir + path;
             
             const parts = resolved.split('/');
             const normalized = [];
@@ -806,53 +856,148 @@
             
             container.innerHTML = '';
             
-            // Apply mode class to main viewer
             mainViewer.classList.remove('novel-mode', 'manga-mode');
-            mainViewer.classList.add(epubType === 'novel' ? 'novel-mode' : 'manga-mode');
+            mainViewer.classList.add(`${epubType}-mode`);
             
-            for (let i = 0; i < pages.length; i++) {
-                const page = pages[i];
+            if (useLazyLoad && epubType === 'manga') {
+                await createLazyViewer(container);
+            } else {
+                await createFullViewer(container);
+            }
+            
+            setupInternalLinks();
+            updateStats();
+        }
+
+        function setupInternalLinks() {
+            document.getElementById('contentContainer').addEventListener('click', async (e) => {
+                const link = e.target.closest('a[href]');
+                if (!link) return;
                 
-                if (!epubZip.file(page.path)) {
-                    console.warn('File not found:', page.path);
-                    continue;
+                const href = link.getAttribute('href');
+                if (href.startsWith('http://') || href.startsWith('https://')) return;
+                
+                e.preventDefault();
+                
+                let [file, anchor] = href.split('#');
+                const currentPage = pages[currentPageIndex];
+                
+                let targetIdx = file ? findPageIndexByPath(resolveEpubPath(currentPage.path, file)) : currentPageIndex;
+                
+                if (targetIdx >= 0) {
+                    await jumpToPage(targetIdx, anchor);
                 }
+            }, true);
+        }
+
+        async function createLazyViewer(container) {
+            for (let i = 0; i < pages.length; i++) {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'manga-page';
+                pageDiv.id = `page-${i}`;
+                pageDiv.dataset.index = i;
+                pageDiv.dataset.loaded = 'false';
+                
+                const placeholder = document.createElement('div');
+                placeholder.className = 'placeholder';
+                placeholder.innerHTML = '<div class="spinner"></div>';
+                pageDiv.appendChild(placeholder);
+                
+                container.appendChild(pageDiv);
+                pages[i].element = pageDiv;
+            }
+            
+            if (imageObserver) imageObserver.disconnect();
+            
+            imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        loadPageWithPreload(parseInt(entry.target.dataset.index));
+                    }
+                });
+            }, {
+                root: document.getElementById('mainViewer'),
+                rootMargin: '1000px'
+            });
+            
+            pages.forEach(p => imageObserver.observe(p.element));
+        }
+
+        async function loadPageWithPreload(index) {
+            await loadSinglePage(index);
+            
+            for (let offset = -PRELOAD_RANGE; offset <= PRELOAD_RANGE; offset++) {
+                if (offset === 0) continue;
+                const idx = index + offset;
+                if (idx >= 0 && idx < pages.length) {
+                    loadSinglePage(idx);
+                }
+            }
+            
+            unloadDistantPages(index);
+        }
+
+        async function loadSinglePage(index) {
+            const page = pages[index];
+            if (!page || page.loaded || loadedPagesSet.has(index)) return;
+            
+            loadedPagesSet.add(index);
+            page.loaded = true;
+            
+            try {
+                if (!epubZip.file(page.path)) return;
 
                 const content = await epubZip.file(page.path).async('string');
                 const doc = new DOMParser().parseFromString(content, 'text/html');
                 const body = doc.querySelector('body');
+                if (!body) return;
                 
-                if (!body) continue;
+                await processImages(body, page.path, index);
                 
-                // Process regular <img> tags
-                const images = body.querySelectorAll('img');
-                for (const img of images) {
-                    const src = img.getAttribute('src');
-                    if (src) await replaceImageSrc(img, src, page.path);
+                if (page.element) {
+                    page.element.innerHTML = body.innerHTML;
+                    page.element.dataset.loaded = 'true';
                 }
                 
-                // Process SVG <image> tags with xlink:href
-                const svgImages = body.querySelectorAll('image[*|href], image[href]');
-                for (const svgImg of svgImages) {
-                    const href = svgImg.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || 
-                                 svgImg.getAttribute('href');
-                    
-                    if (href) {
-                        const imagePath = resolveEpubPath(page.path, href);
+                updateStats();
+            } catch (error) {
+                console.error(`Error page ${index}:`, error);
+            }
+        }
+
+        function unloadDistantPages(current) {
+            pages.forEach((page, idx) => {
+                if (Math.abs(idx - current) > PRELOAD_RANGE * 3 && page.loaded) {
+                    if (page.element?.dataset.loaded === 'true') {
+                        page.element.innerHTML = '<div class="placeholder"><div class="spinner"></div></div>';
+                        page.element.dataset.loaded = 'false';
                         
-                        if (imagePath && epubZip.file(imagePath)) {
-                            const blob = await epubZip.file(imagePath).async('blob');
-                            const url = URL.createObjectURL(blob);
-                            
-                            svgImg.setAttributeNS('http://www.w3.org/1999/xlink', 'href', url);
-                            svgImg.setAttribute('href', url);
-                            
-                            loadedImages.set(imagePath, url);
-                        }
+                        loadedImages.forEach((url, key) => {
+                            if (key.startsWith(`${idx}-`)) {
+                                URL.revokeObjectURL(url);
+                                loadedImages.delete(key);
+                            }
+                        });
+                        
+                        page.loaded = false;
+                        loadedPagesSet.delete(idx);
                     }
                 }
+            });
+        }
+
+        async function createFullViewer(container) {
+            for (let i = 0; i < pages.length; i++) {
+                const page = pages[i];
+                if (!epubZip.file(page.path)) continue;
+
+                const content = await epubZip.file(page.path).async('string');
+                const doc = new DOMParser().parseFromString(content, 'text/html');
+                const body = doc.querySelector('body');
+                if (!body) continue;
                 
-                // Apply appropriate class based on type
+                await processImages(body, page.path, i);
+                
                 const pageDiv = document.createElement('div');
                 pageDiv.className = epubType === 'novel' ? 'novel-chapter' : 'manga-page';
                 pageDiv.id = `page-${i}`;
@@ -860,80 +1005,163 @@
                 
                 container.appendChild(pageDiv);
                 page.element = pageDiv;
+                page.loaded = true;
+                loadedPagesSet.add(i);
             }
-            
-            updateStats();
         }
 
-        async function replaceImageSrc(img, src, basePath) {
+        async function processImages(body, basePath, pageIndex) {
+            const images = body.querySelectorAll('img');
+            for (const img of images) {
+                const src = img.getAttribute('src');
+                if (src) await replaceImageSrc(img, src, basePath, pageIndex);
+            }
+            
+            const svgImages = body.querySelectorAll('image[*|href], image[href]');
+            for (const svgImg of svgImages) {
+                const href = svgImg.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || 
+                             svgImg.getAttribute('href');
+                
+                if (href) {
+                    const imagePath = resolveEpubPath(basePath, href);
+                    
+                    if (imagePath && epubZip.file(imagePath)) {
+                        const blob = await epubZip.file(imagePath).async('blob');
+                        let url;
+                        
+                        if (saveMode) {
+                            url = await resizeImage(blob, 900);
+                        } else {
+                            url = URL.createObjectURL(blob);
+                        }
+                        
+                        svgImg.setAttributeNS('http://www.w3.org/1999/xlink', 'href', url);
+                        svgImg.setAttribute('href', url);
+                        
+                        const key = pageIndex !== undefined ? `${pageIndex}-${imagePath}` : imagePath;
+                        loadedImages.set(key, url);
+                    }
+                }
+            }
+        }
+
+        async function replaceImageSrc(img, src, basePath, pageIndex) {
             try {
                 const imagePath = resolveEpubPath(basePath, src);
                 
                 if (imagePath && epubZip.file(imagePath)) {
                     const blob = await epubZip.file(imagePath).async('blob');
-                    const url = URL.createObjectURL(blob);
+                    let url;
+                    
+                    if (saveMode) {
+                        url = await resizeImage(blob, 900);
+                    } else {
+                        url = URL.createObjectURL(blob);
+                    }
                     
                     img.setAttribute('src', url);
-                    loadedImages.set(imagePath, url);
+                    
+                    const key = pageIndex !== undefined ? `${pageIndex}-${imagePath}` : imagePath;
+                    loadedImages.set(key, url);
                 } else {
                     img.style.display = 'none';
                 }
             } catch (error) {
-                console.error('Error loading image:', src, error);
                 img.style.display = 'none';
             }
+        }
+
+        async function resizeImage(blob, maxWidth) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                const url = URL.createObjectURL(blob);
+                
+                img.onload = async () => {
+                    try {
+                        if (img.width <= maxWidth) {
+                            resolve(url);
+                            return;
+                        }
+                        
+                        const targetWidth = maxWidth;
+                        const targetHeight = Math.round((img.height / img.width) * targetWidth);
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.width = targetWidth;
+                        canvas.height = targetHeight;
+                        
+                        await pica.resize(img, canvas, { quality: 3, alpha: true });
+                        
+                        const resizedBlob = await pica.toBlob(canvas, 'image/jpeg', 0.9);
+                        URL.revokeObjectURL(url);
+                        resolve(URL.createObjectURL(resizedBlob));
+                    } catch (error) {
+                        resolve(url);
+                    }
+                };
+                
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    resolve('');
+                };
+                
+                img.src = url;
+            });
         }
 
         function createSidebar() {
             const container = document.getElementById('thumbnailList');
             container.innerHTML = '';
             
-            if (chapters.length > 0) {
-                chapters.forEach((chapter, i) => {
-                    const thumb = document.createElement('div');
-                    thumb.className = 'chapter-thumb';
-                    thumb.onclick = () => jumpToPage(chapter.pageIndex);
-                    
-                    const number = document.createElement('div');
-                    number.className = 'chapter-number';
-                    number.textContent = `${i + 1}`;
-                    
-                    const preview = document.createElement('div');
-                    preview.className = 'chapter-preview';
-                    preview.textContent = chapter.title;
-                    
-                    thumb.appendChild(number);
-                    thumb.appendChild(preview);
-                    container.appendChild(thumb);
-                    
-                    chapter.thumbElement = thumb;
-                });
-            } else {
-                // Fallback: show all pages
-                pages.forEach((page, i) => {
-                    const thumb = document.createElement('div');
-                    thumb.className = 'chapter-thumb';
-                    thumb.onclick = () => jumpToPage(i);
-                    
-                    const number = document.createElement('div');
-                    number.className = 'chapter-number';
-                    number.textContent = `${i + 1}`;
-                    
-                    thumb.appendChild(number);
-                    container.appendChild(thumb);
-                    
-                    page.thumbElement = thumb;
-                });
-            }
+            const list = chapters.length > 0 ? chapters : pages.map((p, i) => ({ 
+                title: `Trang ${i + 1}`, 
+                pageIndex: i 
+            }));
+            
+            list.forEach((item, i) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'chapter-thumb';
+                thumb.onclick = () => jumpToPage(item.pageIndex, item.anchor);
+                
+                const number = document.createElement('div');
+                number.className = 'chapter-number';
+                number.textContent = `${i + 1}`;
+                
+                const preview = document.createElement('div');
+                preview.className = 'chapter-preview';
+                preview.textContent = item.title;
+                
+                thumb.appendChild(number);
+                thumb.appendChild(preview);
+                container.appendChild(thumb);
+                
+                item.thumbElement = thumb;
+            });
         }
 
-        function jumpToPage(index) {
+        async function jumpToPage(index, anchor = null) {
             if (index < 0 || index >= pages.length) return;
             
+            if (useLazyLoad) {
+                await loadPageWithPreload(index);
+                await new Promise(r => setTimeout(r, 300));
+            }
+            
             const page = pages[index];
-            if (page.element) {
-                page.element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                updateCurrentPage(index);
+            if (!page.element) return;
+            
+            page.element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            updateCurrentPage(index);
+            
+            if (anchor) {
+                await new Promise(r => setTimeout(r, 600));
+                
+                const el = page.element.querySelector(`#${CSS.escape(anchor)}, [id="${anchor}"]`);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    el.style.backgroundColor = 'rgba(255, 107, 157, 0.2)';
+                    setTimeout(() => el.style.backgroundColor = '', 2000);
+                }
             }
         }
 
@@ -945,11 +1173,9 @@
             const progress = ((index + 1) / pages.length) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
             
-            // Update sidebar active state
             document.querySelectorAll('.chapter-thumb').forEach(t => t.classList.remove('active'));
             
             if (chapters.length > 0) {
-                // Find current chapter
                 for (let i = chapters.length - 1; i >= 0; i--) {
                     if (index >= chapters[i].pageIndex) {
                         chapters[i].thumbElement?.classList.add('active');
@@ -962,8 +1188,8 @@
         }
 
         function updateStats() {
-            const memory = (loadedImages.size * 0.5).toFixed(1);
-            document.getElementById('statMemory').textContent = memory;
+            document.getElementById('statMemory').textContent = (loadedImages.size * 0.5).toFixed(1);
+            document.getElementById('statLoaded').textContent = loadedPagesSet.size;
         }
 
         function toggleSidebar() {
@@ -987,6 +1213,7 @@
             if (confirm('Tải file mới?')) {
                 loadedImages.forEach(url => URL.revokeObjectURL(url));
                 loadedImages.clear();
+                loadedPagesSet.clear();
                 pages = [];
                 chapters = [];
                 epubZip = null;
@@ -1005,7 +1232,6 @@
 
         function hideLoading() {}
 
-        // Track scroll
         let scrollTimeout;
         document.getElementById('mainViewer').addEventListener('scroll', () => {
             clearTimeout(scrollTimeout);
@@ -1032,7 +1258,6 @@
             }, 100);
         });
 
-        // Keyboard
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Home') {
                 e.preventDefault();
