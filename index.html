@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>EPUB Reader Pro</title>
+    <title>EPUB Reader</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
@@ -538,7 +538,7 @@
     <div class="upload-overlay" id="uploadOverlay">
         <div class="upload-content">
             <div style="font-size: 3em; margin-bottom: 6px;">📚</div>
-            <h2>EPUB Reader Pro</h2>
+            <h2>EPUB Reader</h2>
             <p>Cách ly Iframe chống hỏng UI • Bảo toàn ảnh &amp; tọa độ đọc</p>
 
             <div class="mode-selection-box">
@@ -1049,11 +1049,25 @@
         function ensureMobiDecoder() {
             return new Promise((resolve, reject) => {
                 if (typeof window.MobiFile === 'function') return resolve();
-                const s = document.createElement('script');
-                s.src = 'https://imclient.herokuapp.com/mobiviewer/viewer/all.js?v=3';
-                s.onload = () => typeof window.MobiFile === 'function' ? resolve() : reject(new Error('Không khởi tạo được bộ giải mã MOBI.'));
-                s.onerror = () => reject(new Error('Không tải được script giải mã MOBI từ server ngoài.'));
-                document.head.appendChild(s);
+
+                const loadScript = (src, onFail) => {
+                    const s = document.createElement('script');
+                    s.src = src;
+                    s.onload = () => {
+                        if (typeof window.MobiFile === 'function') resolve();
+                        else onFail();
+                    };
+                    s.onerror = onFail;
+                    document.head.appendChild(s);
+                };
+
+                // 1. Ưu tiên nạp ./mobi.js cục bộ (chạy mượt cả offline lẫn GitHub Pages)
+                loadScript('./mobi.js', () => {
+                    // 2. Dự phòng: tự kéo từ chính repo GitHub của bạn nếu mở lẻ file html
+                    loadScript('https://cdn.jsdelivr.net/gh/wbcutter/epub-reader@main/mobi.js', () => {
+                        reject(new Error('Không tải được file mobi.js (kiểm tra lại file mobi.js có nằm cùng thư mục index.html không).'));
+                    });
+                });
             });
         }
 
