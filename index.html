@@ -18,8 +18,8 @@
             --accent: #e15b86;
             --border: #f3cdd9;
             --bar-bg: rgba(255, 245, 248, 0.97);
-            --novel-font-size: 1.12em;
-            --webtoon-width: 820px;
+            --novel-font-size: 1.08em;
+            --comic-width: 820px;
         }
 
         [data-reader-theme="milktea"] {
@@ -107,7 +107,7 @@
 
         .controls {
             display: flex;
-            gap: 6px;
+            gap: 5px;
             align-items: center;
             flex-shrink: 0;
         }
@@ -126,7 +126,7 @@
             justify-content: center;
             gap: 4px;
             white-space: nowrap;
-            transition: border-color 0.15s, color 0.15s;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
         }
         .btn:hover { border-color: var(--accent); color: var(--accent); }
         .btn-icon { width: 32px; height: 30px; padding: 0; }
@@ -154,8 +154,7 @@
             padding: 28px 20px;
             box-shadow: 0 8px 28px rgba(225, 91, 134, 0.08);
         }
-        .upload-content h2 { color: var(--accent); margin-bottom: 6px; font-size: 1.5em; }
-        .upload-content p { color: var(--text-sub); font-size: 0.86em; margin-bottom: 16px; }
+        .upload-content h2 { color: var(--accent); margin-bottom: 14px; font-size: 1.5em; }
 
         .mode-selection-box {
             display: flex;
@@ -200,7 +199,7 @@
             background: var(--bg);
             transition: top 0.25s, bottom 0.25s;
         }
-        .viewer-container.immersive { top: 0; bottom: 0; }
+        .viewer-container.immersive { top: 0 !important; bottom: 0 !important; }
 
         .sidebar-backdrop {
             display: none;
@@ -296,8 +295,10 @@
             position: fixed;
             top: 52px;
             right: 10px;
-            width: 300px;
+            width: 308px;
             max-width: calc(100vw - 20px);
+            max-height: calc(100vh - 70px);
+            overflow-y: auto;
             background: var(--card);
             color: var(--text);
             border: 1.5px solid var(--accent);
@@ -319,6 +320,50 @@
             font-weight: 600;
         }
         .set-label span:last-child { color: var(--accent); }
+
+        .seg-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .seg-group {
+            display: flex;
+            flex: 1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 2px;
+            gap: 2px;
+        }
+        .seg-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-sub);
+            padding: 5px 6px;
+            border-radius: 8px;
+            font-size: 0.74em;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s, color 0.15s;
+        }
+        .seg-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+        }
+        .spread-pill {
+            min-width: 42px;
+            height: 28px;
+            border-radius: 10px;
+            border: 1.5px solid var(--accent);
+            background: var(--bg);
+            color: var(--accent);
+            font-size: 0.75em;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .spread-pill:hover { background: var(--accent); color: #fff; }
 
         .range-wrap {
             display: flex;
@@ -367,41 +412,130 @@
             align-items: center;
             background: var(--bg);
             padding: 14px;
+            position: relative;
             -webkit-overflow-scrolling: touch;
         }
         .main-viewer::-webkit-scrollbar { width: 7px; }
         .main-viewer::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
 
-        /* WEBTOON MODE */
-        .main-viewer.webtoon-mode {
+        /* COMIC SCROLL MODE */
+        .main-viewer.comic-mode {
             padding: 0 !important;
             background: #111114 !important;
         }
-        .main-viewer.webtoon-mode .content-container {
+        .main-viewer.comic-mode .content-container {
             width: 100%;
-            max-width: var(--webtoon-width);
+            max-width: var(--comic-width);
             margin: 0 auto;
-            line-height: 0 !important;
-            font-size: 0 !important;
             transition: max-width 0.15s ease;
         }
-        .webtoon-slice {
+        .comic-slice {
             display: block;
             width: 100%;
-            margin: 0;
-            padding: 0;
-            line-height: 0;
-            font-size: 0;
-        }
-        .webtoon-slice img {
-            display: block;
-            width: 100%;
-            height: auto;
             margin: 0;
             padding: 0;
         }
 
-        /* NOVEL MODE */
+        /* PAGED MODE */
+        .main-viewer.paged-mode {
+            overflow: hidden !important;
+            padding: 0 !important;
+            background: #111114 !important;
+            justify-content: center;
+            align-items: center;
+        }
+        .main-viewer.paged-mode.novel-bg {
+            background: var(--bg) !important;
+        }
+        .paged-stage {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .spread-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            gap: 0;
+        }
+        .spread-row.rtl { flex-direction: row-reverse; }
+        .spread-slot {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+        .spread-row.single .spread-slot {
+            width: 100%;
+            justify-content: center;
+        }
+        .spread-row.double .spread-slot {
+            width: 50%;
+        }
+        .spread-slot.flush-right { justify-content: flex-end; }
+        .spread-slot.flush-left { justify-content: flex-start; }
+        .spread-slot img.comic-paged-img {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* KHUNG SÁCH NOVEL */
+        .novel-book-frame {
+            position: relative;
+            background: var(--card);
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .novel-book-frame.has-spine::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0; left: 50%;
+            width: 1px;
+            background: var(--border);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.12);
+            pointer-events: none;
+            z-index: 5;
+        }
+        .novel-book-viewport {
+            position: relative;
+            overflow: hidden;
+        }
+        .novel-book-viewport iframe.epub-frame {
+            display: block;
+            width: 100%;
+            height: 100% !important;
+        }
+
+        /* VÙNG CLICK CHUYỂN TRANG 1/5 TRÁI (20%) - 1/5 PHẢI (20%), GIỮA 60% AN TOÀN */
+        .tap-zone {
+            position: absolute;
+            top: 0; bottom: 0;
+            z-index: 20;
+            cursor: pointer;
+        }
+        .tap-zone-left { left: 0; width: 20%; }
+        .tap-zone-center { left: 20%; width: 60%; pointer-events: none; }
+        .tap-zone-center.interactive { pointer-events: auto; }
+        .tap-zone-right { right: 0; width: 20%; }
+
+        /* NOVEL SCROLL MODE */
         .main-viewer.novel-mode { padding: 18px 12px; }
         .main-viewer.novel-mode .content-container {
             width: 100%;
@@ -418,18 +552,7 @@
             min-height: 160px;
             overflow: hidden;
         }
-        .novel-chapter.direct-html {
-            padding: 32px 36px;
-            font-size: var(--novel-font-size);
-            line-height: 1.9;
-            user-select: text;
-            -webkit-user-select: text;
-        }
-        @media (max-width: 768px) {
-            .novel-chapter.direct-html { padding: 20px 16px; }
-        }
 
-        /* IFRAME CÁCH LY HOÀN TOÀN CSS EPUB */
         iframe.epub-frame {
             display: block;
             width: 100%;
@@ -457,7 +580,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ================= FOOTER & MŨI TÊN SVG ================= */
+        /* ================= FOOTER & THANH TIẾN TRÌNH ================= */
         .footer {
             position: fixed;
             bottom: 0; left: 0; right: 0;
@@ -503,6 +626,12 @@
             height: 3px;
             background: rgba(0, 0, 0, 0.08);
             z-index: 1001;
+            transition: opacity 0.2s, transform 0.25s;
+        }
+        .progress-bar.hidden {
+            opacity: 0;
+            transform: translateY(100%);
+            pointer-events: none;
         }
         .progress-fill {
             height: 100%;
@@ -542,7 +671,7 @@
 
             <div class="mode-selection-box">
                 <div class="mode-tab-btn active" id="initTabAuto" onclick="selectInitialMode('auto')">⚡ Tự nhận diện</div>
-                <div class="mode-tab-btn" id="initTabWebtoon" onclick="selectInitialMode('webtoon')">🎨 Webtoon</div>
+                <div class="mode-tab-btn" id="initTabComic" onclick="selectInitialMode('comic')">🎨 Comic</div>
                 <div class="mode-tab-btn" id="initTabNovel" onclick="selectInitialMode('novel')">📖 Novel</div>
             </div>
 
@@ -563,7 +692,7 @@
             <h1 id="bookTitle">EPUB Reader</h1>
         </div>
         <div class="controls">
-            <button class="btn" id="modeSwitchBtn" onclick="switchReadingMode()" title="Chuyển chế độ đọc">🎨 Webtoon</button>
+            <button class="btn" id="modeSwitchBtn" onclick="switchReadingMode()" title="Chuyển chế độ Comic / Novel">🎨 Comic</button>
             <button class="btn btn-icon" onclick="toggleSettings()" title="Cài đặt hiển thị & Theme">⚙️</button>
             <button class="btn btn-icon" onclick="confirmOpenNew()" title="Mở sách khác">📂</button>
         </div>
@@ -571,6 +700,21 @@
 
     <!-- BẢNG CÀI ĐẶT NHANH -->
     <div class="settings-panel" id="settingsPanel">
+        <div class="set-row">
+            <div class="set-label">
+                <span>🧭 Kiểu đọc</span>
+                <span id="readDirLabel">Scroll</span>
+            </div>
+            <div class="seg-row">
+                <div class="seg-group">
+                    <button class="seg-btn active" id="btnDirScroll" onclick="setReadDirection('scroll')">Scroll</button>
+                    <button class="seg-btn" id="btnDirLtr" onclick="setReadDirection('ltr')">LTR</button>
+                    <button class="seg-btn" id="btnDirRtl" onclick="setReadDirection('rtl')">RTL</button>
+                </div>
+                <button class="spread-pill" id="btnSpreadToggle" onclick="toggleSpreadCount()" title="Bấm để đổi 2P / 1P" style="display:none">2P</button>
+            </div>
+        </div>
+
         <div class="set-row">
             <div class="set-label">
                 <span>🎨 Giao diện (Theme)</span>
@@ -587,24 +731,24 @@
 
         <div class="set-row">
             <div class="set-label">
-                <span>🖼️ Độ rộng ảnh (Webtoon)</span>
-                <span id="webtoonWidthLabel">820px</span>
+                <span>🖼️ Độ rộng ảnh (Scroll)</span>
+                <span id="comicWidthLabel">820px</span>
             </div>
             <div class="range-wrap">
-                <button class="btn btn-icon" onclick="stepWebtoonWidth(-60)">−</button>
-                <input type="range" id="webtoonWidthSlider" min="320" max="1400" step="20" value="820">
-                <button class="btn btn-icon" onclick="stepWebtoonWidth(60)">+</button>
+                <button class="btn btn-icon" onclick="stepComicWidth(-60)">−</button>
+                <input type="range" id="comicWidthSlider" min="320" max="1400" step="20" value="820">
+                <button class="btn btn-icon" onclick="stepComicWidth(60)">+</button>
             </div>
         </div>
 
         <div class="set-row">
             <div class="set-label">
                 <span>🔤 Cỡ chữ (Novel)</span>
-                <span id="fontSizeLabel">112%</span>
+                <span id="fontSizeLabel">108%</span>
             </div>
             <div class="range-wrap">
                 <button class="btn btn-icon" onclick="adjustFontSize(-0.08)">A-</button>
-                <input type="range" id="fontSizeSlider" min="0.8" max="2.0" step="0.04" value="1.12">
+                <input type="range" id="fontSizeSlider" min="0.8" max="2.0" step="0.04" value="1.08">
                 <button class="btn btn-icon" onclick="adjustFontSize(0.08)">A+</button>
             </div>
         </div>
@@ -649,19 +793,22 @@
             <span id="coordPercent">0%</span>
         </div>
         <div class="nav-arrows">
-            <button class="arrow-btn" onclick="scrollToTop()" title="Lên đầu trang (Home)">
+            <button class="arrow-btn" onclick="handleFooterPrev()" title="Lên đầu / Trang trước">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
             </button>
-            <button class="arrow-btn" onclick="scrollToBottom()" title="Xuống cuối trang (End)">
+            <button class="arrow-btn" onclick="handleFooterNext()" title="Xuống cuối / Trang sau">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
         </div>
     </div>
 
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
     <div class="toast" id="toast"></div>
 
     <script>
+        // ==========================================
+        // LAYER 1: VÙNG ĐỆM BẢO TOÀN DỮ LIỆU GỐC
+        // ==========================================
         let epubZip = null;
         let pdfDoc = null;
         let mobiInstance = null;
@@ -670,16 +817,31 @@
         let bookPlaylist = [];
         let currentBookIndex = 0;
 
-        let currentPageIndex = 0;
-        let currentScrollPct = 0;
-
-        // Bảo toàn Blob URL & CSS gốc trong RAM (chỉ giải phóng khi F5 hoặc mở sách mới)
-        let blobCache = new Map();
-        let loadedPagesSet = new Set();
+        let persistentAssetCache = new Map();
         let epubCssText = '';
 
+        // ==========================================
+        // LAYER 2: VÙNG ĐỆM HIỂN THỊ ĐỘNG & REVOKE RAM
+        // ==========================================
+        const REVOKE_DISTANCE = 8;
+        let activeLoadedIndices = new Set();
+
+        let currentPageIndex = 0;
+        let currentScrollPct = 0;
         let preferredMode = 'auto';
-        let currentReadingMode = 'webtoon';
+        let currentReadingMode = 'comic'; // 'comic' | 'novel'
+        let readDirection = 'scroll';     // 'scroll' | 'ltr' | 'rtl'
+        let spreadCount = 2;              // Mặc định 2P, bấm để đổi 1P
+
+        let spreads = [];
+        let currentSpreadIdx = 0;
+        let comicA4SubState = { active: false, pageIdx: -1, urls: [], subIdx: 0 };
+
+        let novelPagedState = {
+            pageIdx: 0, subIdx: 0, totalSubs: 1,
+            stride: 600, maxScroll: 0, viewW: 600, isRtl: false
+        };
+
         let currentBookHash = '';
         let currentFileName = '';
         let isImmersive = false;
@@ -696,18 +858,27 @@
         const uploadOverlay = document.getElementById('uploadOverlay');
         const fileInput = document.getElementById('epubInput');
 
+        // Nhận diện ảnh gáy (spine) chuẩn theo tỷ lệ dọc lệch lớn (h > w * 3.0)
+        function isSpineDims(w, h) {
+            return w > 0 && h > 0 && h > w * 3.0;
+        }
+
         // ==========================================
-        // KHỞI TẠO CÀI ĐẶT (MẶC ĐỊNH: DÂU NHẠT)
+        // KHỞI TẠO CÀI ĐẶT
         // ==========================================
         (function initSettings() {
             const savedTheme = localStorage.getItem('reader_theme_v3') || 'sakura';
             setTheme(savedTheme, false);
 
-            const savedWidth = parseInt(localStorage.getItem('reader_webtoon_w')) || 820;
-            setWebtoonWidth(savedWidth, false);
+            const savedWidth = parseInt(localStorage.getItem('reader_comic_w')) || 820;
+            setComicWidth(savedWidth, false);
 
-            const savedFont = parseFloat(localStorage.getItem('reader_font_size')) || 1.12;
+            const savedFont = parseFloat(localStorage.getItem('reader_font_size')) || 1.08;
             setFontSize(savedFont, false);
+
+            const savedSpread = parseInt(localStorage.getItem('reader_comic_spread')) || 2;
+            spreadCount = savedSpread === 1 ? 1 : 2;
+            document.getElementById('btnSpreadToggle').textContent = spreadCount + 'P';
         })();
 
         function showToast(msg) {
@@ -715,13 +886,13 @@
             t.textContent = msg;
             t.classList.add('show');
             clearTimeout(t._timer);
-            t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+            t._timer = setTimeout(() => t.classList.remove('show'), 2000);
         }
 
         function selectInitialMode(mode) {
             preferredMode = mode;
             document.getElementById('initTabAuto').classList.toggle('active', mode === 'auto');
-            document.getElementById('initTabWebtoon').classList.toggle('active', mode === 'webtoon');
+            document.getElementById('initTabComic').classList.toggle('active', mode === 'comic');
             document.getElementById('initTabNovel').classList.toggle('active', mode === 'novel');
         }
 
@@ -738,19 +909,19 @@
             p.addEventListener('click', () => setTheme(p.dataset.t));
         });
 
-        function setWebtoonWidth(px, save = true) {
+        function setComicWidth(px, save = true) {
             const clamped = Math.max(320, Math.min(1400, Math.round(px)));
-            document.documentElement.style.setProperty('--webtoon-width', clamped + 'px');
-            document.getElementById('webtoonWidthSlider').value = clamped;
-            document.getElementById('webtoonWidthLabel').textContent = clamped >= 1400 ? '100%' : clamped + 'px';
-            if (save) localStorage.setItem('reader_webtoon_w', clamped);
+            document.documentElement.style.setProperty('--comic-width', clamped + 'px');
+            document.getElementById('comicWidthSlider').value = clamped;
+            document.getElementById('comicWidthLabel').textContent = clamped >= 1400 ? '100%' : clamped + 'px';
+            if (save) localStorage.setItem('reader_comic_w', clamped);
             setTimeout(syncAllIframesHeight, 160);
         }
-        function stepWebtoonWidth(delta) {
-            const cur = parseInt(document.getElementById('webtoonWidthSlider').value) || 820;
-            setWebtoonWidth(cur + delta);
+        function stepComicWidth(delta) {
+            const cur = parseInt(document.getElementById('comicWidthSlider').value) || 820;
+            setComicWidth(cur + delta);
         }
-        document.getElementById('webtoonWidthSlider').addEventListener('input', e => setWebtoonWidth(e.target.value));
+        document.getElementById('comicWidthSlider').addEventListener('input', e => setComicWidth(e.target.value));
 
         function setFontSize(em, save = true) {
             const clamped = Math.max(0.8, Math.min(2.0, parseFloat(em)));
@@ -758,10 +929,14 @@
             document.getElementById('fontSizeSlider').value = clamped;
             document.getElementById('fontSizeLabel').textContent = Math.round(clamped * 100) + '%';
             if (save) localStorage.setItem('reader_font_size', clamped);
-            syncAllIframesStyle();
+            if (isPagedNovel()) {
+                renderNovelPagedChapter(novelPagedState.pageIdx, novelPagedState.subIdx);
+            } else {
+                syncAllIframesStyle();
+            }
         }
         function adjustFontSize(delta) {
-            const cur = parseFloat(document.getElementById('fontSizeSlider').value) || 1.12;
+            const cur = parseFloat(document.getElementById('fontSizeSlider').value) || 1.08;
             setFontSize(cur + delta);
         }
         document.getElementById('fontSizeSlider').addEventListener('input', e => setFontSize(e.target.value));
@@ -771,44 +946,586 @@
         }
 
         // ==========================================
-        // CSS NỘI BỘ BÊN TRONG IFRAME (CÁCH LY HOÀN TOÀN VỚI UI)
+        // KIỂU ĐỌC: SCROLL / LTR / RTL + 2P / 1P
         // ==========================================
-        function buildIframeBaseCss() {
+        function isPagedMode() {
+            return readDirection === 'ltr' || readDirection === 'rtl';
+        }
+        function isPagedComic() {
+            return currentReadingMode === 'comic' && isPagedMode();
+        }
+        function isPagedNovel() {
+            if (currentReadingMode !== 'novel' || !isPagedMode()) return false;
+            const p = pages[currentPageIndex];
+            return p && !p.isPdf && !p.isDirectImage;
+        }
+
+        function buildSpreads() {
+            spreads = [];
+            if (pages.length === 0) return;
+            if (spreadCount === 1) {
+                for (let i = 0; i < pages.length; i++) spreads.push([i]);
+            } else {
+                spreads.push([0]);
+                for (let i = 1; i < pages.length; i += 2) {
+                    if (i + 1 < pages.length) spreads.push([i, i + 1]);
+                    else spreads.push([i]);
+                }
+            }
+        }
+
+        function findSpreadIndexForPage(pageIdx) {
+            const idx = spreads.findIndex(sp => sp.includes(pageIdx));
+            return idx >= 0 ? idx : 0;
+        }
+
+        async function setReadDirection(dir) {
+            if (readDirection === dir) return;
+            const savedPage = currentPageIndex;
+            const savedPct = currentScrollPct;
+            readDirection = dir;
+            applyCurrentModeStyles();
+            if (pages.length === 0) return;
+
+            clearComicA4Cache();
+            unloadAllActivePages();
+            pages.forEach(p => { p.cachedHeight = 0; });
+            await createViewer();
+            await jumpToPage(savedPage, null, dir === 'scroll' ? savedPct : 0);
+            const names = { scroll: 'Scroll', ltr: 'Left → Right', rtl: 'Right → Left' };
+            showToast(names[dir]);
+        }
+
+        async function toggleSpreadCount() {
+            spreadCount = spreadCount === 2 ? 1 : 2;
+            localStorage.setItem('reader_comic_spread', spreadCount);
+            document.getElementById('btnSpreadToggle').textContent = spreadCount + 'P';
+
+            if (isPagedMode() && pages.length > 0) {
+                const savedPage = currentPageIndex;
+                if (isPagedNovel()) {
+                    await renderNovelPagedChapter(savedPage, novelPagedState.subIdx);
+                } else if (comicA4SubState.active) {
+                    renderComicA4Spread(comicA4SubState.subIdx);
+                } else {
+                    buildSpreads();
+                    await renderComicSpread(findSpreadIndexForPage(savedPage));
+                }
+                showToast(spreadCount === 2 ? '2 Trang' : '1 Trang');
+            }
+        }
+
+        // ==========================================
+        // CHUYỂN CHỮ NOVEL SANG ẢNH A4 HD CHO COMIC (LTR: NGANG / RTL: TATEGAKI)
+        // Nền hồng nhạt (#fff0f5), Chữ tím đen tối (#1e1028), Lọc sạch <rt>
+        // ==========================================
+        function clearComicA4Cache() {
+            if (comicA4SubState.urls && comicA4SubState.urls.length > 0) {
+                comicA4SubState.urls.forEach(u => { try { URL.revokeObjectURL(u); } catch (e) {} });
+            }
+            comicA4SubState = { active: false, pageIdx: -1, urls: [], subIdx: 0 };
+        }
+
+        function tokenizeForWrap(text) {
+            const tokens = [];
+            let buf = '';
+            for (const ch of text) {
+                const code = ch.charCodeAt(0);
+                if (code >= 0x2E80) {
+                    if (buf) { tokens.push(buf); buf = ''; }
+                    tokens.push(ch);
+                } else if (ch === ' ' || ch === '\t') {
+                    buf += ' ';
+                    tokens.push(buf);
+                    buf = '';
+                } else {
+                    buf += ch;
+                }
+            }
+            if (buf) tokens.push(buf);
+            return tokens;
+        }
+
+        function extractCleanBlocks(bodyEl) {
+            // Clone và xóa toàn bộ <rt>, <rp> để không bị dính chữ phiên âm vào văn bản
+            const clone = bodyEl.cloneNode(true);
+            clone.querySelectorAll('rt, rp').forEach(el => el.remove());
+
+            const blocks = [];
+            const walk = (node) => {
+                if (node.nodeType === 1) {
+                    const tag = node.tagName.toLowerCase();
+                    if (tag === 'img') {
+                        const src = node.getAttribute('src');
+                        if (src) blocks.push({ type: 'img', src });
+                        return;
+                    }
+                    if (['h1','h2','h3','h4','p','li','blockquote'].includes(tag)) {
+                        const imgs = node.querySelectorAll('img');
+                        if (imgs.length > 0) {
+                            imgs.forEach(im => im.getAttribute('src') && blocks.push({ type: 'img', src: im.getAttribute('src') }));
+                        }
+                        const txt = (node.textContent || '').replace(/\s+/g, ' ').trim();
+                        if (txt) blocks.push({ type: tag.startsWith('h') ? 'heading' : 'para', text: txt });
+                        return;
+                    }
+                    if (node.children && node.children.length > 0) {
+                        Array.from(node.childNodes).forEach(walk);
+                        return;
+                    }
+                    const txt = (node.textContent || '').replace(/\s+/g, ' ').trim();
+                    if (txt) blocks.push({ type: 'para', text: txt });
+                } else if (node.nodeType === 3) {
+                    const txt = (node.textContent || '').replace(/\s+/g, ' ').trim();
+                    if (txt) blocks.push({ type: 'para', text: txt });
+                }
+            };
+            Array.from(clone.childNodes).forEach(walk);
+            return blocks;
+        }
+
+        async function loadImgObj(src) {
+            return new Promise((resolve, reject) => {
+                const i = new Image();
+                i.onload = () => resolve(i);
+                i.onerror = reject;
+                i.src = src;
+            });
+        }
+
+        // Vẽ A4 dọc (Tategaki) cho Comic RTL
+        async function convertTextToTategakiA4(blocks) {
+            const W = 1240, H = 1754;
+            const padX = 90, padY = 100;
+            const colStep = 64;
+            const charStep = 40;
+            const maxY = H - padY;
+
+            const blobs = [];
+            let cv = null, ctx = null, x = W - padX - colStep / 2, y = padY;
+            let hasDrawn = false;
+
+            const newPage = () => {
+                cv = document.createElement('canvas');
+                cv.width = W; cv.height = H;
+                ctx = cv.getContext('2d');
+                ctx.fillStyle = '#fff0f5';
+                ctx.fillRect(0, 0, W, H);
+                ctx.textBaseline = 'top';
+                ctx.textAlign = 'center';
+                x = W - padX - colStep / 2;
+                y = padY;
+                hasDrawn = false;
+            };
+
+            const flushPage = async () => {
+                if (!cv || !hasDrawn) return;
+                const url = await new Promise(res => {
+                    cv.toBlob(b => { cv.width = 0; cv.height = 0; res(b ? URL.createObjectURL(b) : null); }, 'image/jpeg', 0.92);
+                });
+                if (url) blobs.push(url);
+                cv = null; ctx = null;
+            };
+
+            const nextCol = async () => {
+                x -= colStep;
+                y = padY;
+                if (x < padX + colStep / 2) {
+                    await flushPage();
+                    newPage();
+                }
+            };
+
+            // Ký tự cần xoay 90 độ khi viết dọc
+            const rotateChars = new Set(['「','」','『','』','（','）','(',')','—','―','ー','…','〜','～','=','＝','[',']','【','】']);
+
+            newPage();
+
+            for (const blk of blocks) {
+                if (blk.type === 'img') {
+                    try {
+                        const im = await loadImgObj(blk.src);
+                        if (isSpineDims(im.naturalWidth, im.naturalHeight)) {
+                            // Ảnh gáy (spine): đặt gọn bên mép phải cùng trang với chữ (giống zz.png)
+                            const targetH = H - padY * 2;
+                            const dw = Math.min(130, Math.round(targetH * (im.naturalWidth / im.naturalHeight)));
+                            if (x - dw < padX) { await flushPage(); newPage(); }
+                            ctx.drawImage(im, Math.round(x - dw / 2), padY, dw, targetH);
+                            hasDrawn = true;
+                            x -= (dw + 36);
+                            y = padY;
+                        } else {
+                            // Ảnh minh họa thường: trang riêng, căn giữa, giữ đúng tỷ lệ
+                            if (hasDrawn) { await flushPage(); newPage(); }
+                            const scale = Math.min((W - 80) / im.naturalWidth, (H - 80) / im.naturalHeight);
+                            const dw = Math.round(im.naturalWidth * scale);
+                            const dh = Math.round(im.naturalHeight * scale);
+                            ctx.drawImage(im, Math.round((W - dw) / 2), Math.round((H - dh) / 2), dw, dh);
+                            hasDrawn = true;
+                            await flushPage();
+                            newPage();
+                        }
+                    } catch (e) {}
+                    continue;
+                }
+
+                const isHead = blk.type === 'heading';
+                const fSize = isHead ? 42 : 34;
+                const cStep = isHead ? 48 : charStep;
+                const chars = Array.from(blk.text);
+
+                if (y > padY) await nextCol();
+                if (!isHead) y += cStep; // Thụt đầu dòng 1 ký tự
+
+                for (const ch of chars) {
+                    if (y + cStep > maxY) await nextCol();
+                    ctx.font = `${isHead ? '700' : '400'} ${fSize}px "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif`;
+                    ctx.fillStyle = isHead ? '#3c1345' : '#1e1028';
+
+                    if (rotateChars.has(ch)) {
+                        ctx.save();
+                        ctx.translate(x, y + fSize * 0.5);
+                        ctx.rotate(Math.PI / 2);
+                        ctx.fillText(ch, 0, -fSize * 0.5);
+                        ctx.restore();
+                    } else if (ch === '。' || ch === '、') {
+                        ctx.fillText(ch, x + fSize * 0.3, y - fSize * 0.25);
+                    } else {
+                        ctx.fillText(ch, x, y);
+                    }
+                    hasDrawn = true;
+                    y += cStep;
+                }
+                await nextCol();
+            }
+
+            if (hasDrawn) await flushPage();
+            return blobs;
+        }
+
+        // Vẽ A4 ngang cho Comic LTR
+        async function convertTextHtmlToA4Images(bodyEl, isRtl = false) {
+            const blocks = extractCleanBlocks(bodyEl);
+            if (blocks.length === 0) return [];
+            if (isRtl) return await convertTextToTategakiA4(blocks);
+
+            const W = 1240, H = 1754;
+            const padX = 96, padY = 110;
+            const maxW = W - padX * 2;
+            const maxY = H - padY;
+
+            const blobs = [];
+            let cv = null, ctx = null, y = padY, hasDrawn = false;
+
+            const newPage = () => {
+                cv = document.createElement('canvas');
+                cv.width = W; cv.height = H;
+                ctx = cv.getContext('2d');
+                ctx.fillStyle = '#fff0f5';
+                ctx.fillRect(0, 0, W, H);
+                ctx.textBaseline = 'top';
+                y = padY;
+                hasDrawn = false;
+            };
+
+            const flushPage = async () => {
+                if (!cv || !hasDrawn) return;
+                const url = await new Promise(res => {
+                    cv.toBlob(b => { cv.width = 0; cv.height = 0; res(b ? URL.createObjectURL(b) : null); }, 'image/jpeg', 0.92);
+                });
+                if (url) blobs.push(url);
+                cv = null; ctx = null;
+            };
+
+            newPage();
+
+            for (const blk of blocks) {
+                if (blk.type === 'img') {
+                    try {
+                        const im = await loadImgObj(blk.src);
+                        if (isSpineDims(im.naturalWidth, im.naturalHeight)) {
+                            // Ảnh gáy nhỏ gọn căn giữa phía trên, không chiếm nguyên trang
+                            const targetH = 380;
+                            const dw = Math.min(110, Math.round(targetH * (im.naturalWidth / im.naturalHeight)));
+                            if (y + targetH > maxY) { await flushPage(); newPage(); }
+                            ctx.drawImage(im, Math.round((W - dw) / 2), y, dw, targetH);
+                            hasDrawn = true;
+                            y += targetH + 36;
+                        } else {
+                            if (hasDrawn) { await flushPage(); newPage(); }
+                            const scale = Math.min(maxW / im.naturalWidth, (H - padY * 2) / im.naturalHeight);
+                            const dw = Math.round(im.naturalWidth * scale);
+                            const dh = Math.round(im.naturalHeight * scale);
+                            ctx.drawImage(im, Math.round((W - dw) / 2), Math.round((H - dh) / 2), dw, dh);
+                            hasDrawn = true;
+                            await flushPage();
+                            newPage();
+                        }
+                    } catch (e) {}
+                    continue;
+                }
+
+                const isHead = blk.type === 'heading';
+                const fontSize = isHead ? 42 : 33;
+                const lineH = isHead ? 64 : 56;
+                ctx.font = `${isHead ? '700' : '400'} ${fontSize}px "Segoe UI", "Noto Sans JP", "Noto Sans KR", sans-serif`;
+                ctx.fillStyle = isHead ? '#3c1345' : '#1e1028';
+
+                const tokens = tokenizeForWrap(blk.text);
+                let line = isHead ? '' : ' ';
+                for (const tok of tokens) {
+                    if (ctx.measureText(line + tok).width > maxW && line.trim().length > 0) {
+                        if (y + lineH > maxY) {
+                            await flushPage();
+                            newPage();
+                            ctx.font = `${isHead ? '700' : '400'} ${fontSize}px "Segoe UI", "Noto Sans JP", "Noto Sans KR", sans-serif`;
+                            ctx.fillStyle = isHead ? '#3c1345' : '#1e1028';
+                        }
+                        ctx.fillText(line.trimEnd(), padX, y);
+                        hasDrawn = true;
+                        y += lineH;
+                        line = tok.trimStart();
+                    } else {
+                        line += tok;
+                    }
+                }
+                if (line.trim().length > 0) {
+                    if (y + lineH > maxY) {
+                        await flushPage();
+                        newPage();
+                        ctx.font = `${isHead ? '700' : '400'} ${fontSize}px "Segoe UI", "Noto Sans JP", "Noto Sans KR", sans-serif`;
+                        ctx.fillStyle = isHead ? '#3c1345' : '#1e1028';
+                    }
+                    ctx.fillText(line.trimEnd(), padX, y);
+                    hasDrawn = true;
+                    y += lineH;
+                }
+                y += isHead ? 28 : 20;
+            }
+
+            if (hasDrawn) await flushPage();
+            return blobs;
+        }
+
+        // ==========================================
+        // CSS NỘI BỘ BÊN TRONG IFRAME
+        // (ẨN RUBY Ở SCROLL & LTR, CHỈ HIỆN RUBY Ở TATEGAKI RTL)
+        // ==========================================
+        function buildIframeBaseCss(opts = {}) {
+            const { novelPaged = null } = opts;
             const cs = getComputedStyle(document.documentElement);
             const cardBg = cs.getPropertyValue('--card').trim() || '#fff9fb';
             const textCol = cs.getPropertyValue('--text').trim() || '#381e27';
             const accentCol = cs.getPropertyValue('--accent').trim() || '#e15b86';
-            const fontSize = cs.getPropertyValue('--novel-font-size').trim() || '1.12em';
+            const borderCol = cs.getPropertyValue('--border').trim() || '#f3cdd9';
+            const fontSize = cs.getPropertyValue('--novel-font-size').trim() || '1.08em';
 
-            if (currentReadingMode === 'webtoon') {
+            const pdfOverlayCss = `
+                .pdf-page-wrap {
+                    position: relative; width: 100%; margin: 0 auto;
+                    overflow: hidden; container-type: inline-size; background: #ffffff;
+                }
+                .pdf-bg-img {
+                    display: block !important; width: 100% !important; height: auto !important;
+                    margin: 0 !important; padding: 0 !important; border-radius: 0 !important;
+                    pointer-events: none !important; user-select: none !important;
+                    -webkit-user-select: none !important; -webkit-user-drag: none !important;
+                }
+                .pdf-text-layer {
+                    position: absolute; inset: 0; overflow: hidden; line-height: 1;
+                    pointer-events: auto; user-select: text; -webkit-user-select: text;
+                }
+                .pdf-text-layer span {
+                    position: absolute; color: transparent; white-space: pre;
+                    transform-origin: 0% 0%; cursor: text;
+                }
+                .pdf-text-layer ::selection {
+                    background: rgba(225, 91, 134, 0.35); color: transparent;
+                }
+            `;
+
+            // 1. NOVEL PAGED: RTL (TATEGAKI CÓ RUBY + SPINE INLINE + ẢNH CĂN GIỮA) / LTR (KHÔNG RUBY)
+            if (novelPaged) {
+                if (novelPaged.isRtl) {
+                    const { viewW, viewH, fontSizePx, lineStep } = novelPaged;
+                    return `
+                        html, body {
+                            margin: 0 !important; padding: 0 !important;
+                            width: ${viewW}px !important; height: ${viewH}px !important;
+                            overflow: hidden !important;
+                            background: ${cardBg} !important;
+                            color: ${textCol} !important;
+                            font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", "Segoe UI", serif;
+                        }
+                        #tate-scroll {
+                            width: ${viewW}px !important;
+                            height: ${viewH}px !important;
+                            overflow: hidden !important;
+                            direction: ltr !important;
+                        }
+                        #epub-root {
+                            writing-mode: vertical-rl !important;
+                            -webkit-writing-mode: vertical-rl !important;
+                            text-orientation: mixed !important;
+                            height: ${viewH}px !important;
+                            font-size: ${fontSizePx}px !important;
+                            line-height: ${lineStep}px !important;
+                            display: inline-block !important;
+                            margin: 0 !important; padding: 0 !important;
+                            text-align: start !important;
+                        }
+                        #epub-root p, #epub-root div, #epub-root h1, #epub-root h2, #epub-root h3 {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            line-height: ${lineStep}px !important;
+                        }
+                        #epub-root p { text-indent: 1em; }
+                        h1, h2, h3 { color: ${accentCol}; }
+                        a { color: ${accentCol}; text-decoration: none; }
+                        .tcy { text-combine-upright: all; -webkit-text-combine: horizontal; }
+                        ruby { ruby-position: over; line-height: ${lineStep}px !important; }
+                        rt { font-size: 0.48em; color: ${accentCol}; line-height: 0 !important; user-select: none; }
+
+                        /* Ảnh gáy (spine) nằm gọn sát cột chữ giống zz.png */
+                        img.spine-strip {
+                            display: inline-block !important;
+                            writing-mode: horizontal-tb !important;
+                            height: ${viewH - 6}px !important;
+                            width: auto !important;
+                            max-width: 140px !important;
+                            vertical-align: top !important;
+                            object-fit: contain !important;
+                            margin: 0 !important;
+                        }
+                        /* Ảnh minh họa thường: khống chế chiều cao, width co theo tỷ lệ & căn giữa */
+                        img:not(.spine-strip), svg {
+                            display: inline-block !important;
+                            writing-mode: horizontal-tb !important;
+                            max-height: ${viewH - 12}px !important;
+                            max-width: ${viewW - 12}px !important;
+                            width: auto !important;
+                            height: auto !important;
+                            object-fit: contain !important;
+                            vertical-align: middle !important;
+                            margin: 0 !important;
+                        }
+                    `;
+                } else {
+                    // LTR: Ẩn ruby, 2P có khe 56px / 1P rộng không sọc
+                    const { viewW, viewH, colW, gap } = novelPaged;
+                    return `
+                        html, body {
+                            margin: 0 !important; padding: 0 !important;
+                            width: ${viewW}px !important; height: ${viewH}px !important;
+                            overflow: hidden !important;
+                            background: ${cardBg} !important;
+                            color: ${textCol} !important;
+                            font-family: 'Segoe UI', system-ui, sans-serif;
+                            font-size: ${fontSize};
+                            line-height: 1.85;
+                            writing-mode: horizontal-tb !important;
+                            -webkit-writing-mode: horizontal-tb !important;
+                        }
+                        #epub-root {
+                            width: ${viewW}px !important;
+                            height: ${viewH}px !important;
+                            column-width: ${colW}px !important;
+                            column-gap: ${gap}px !important;
+                            column-fill: auto !important;
+                            margin: 0 !important; padding: 0 !important;
+                            box-sizing: border-box !important;
+                            transition: transform 0.16s ease-out;
+                        }
+                        #epub-root * {
+                            writing-mode: horizontal-tb !important;
+                            -webkit-writing-mode: horizontal-tb !important;
+                            box-sizing: border-box;
+                            max-width: ${colW}px !important;
+                        }
+                        rt, rp { display: none !important; }
+                        p { margin: 0 0 0.9em 0; text-align: justify; }
+                        h1, h2, h3 { color: ${accentCol}; line-height: 1.35; margin: 0.9em 0 0.5em; break-after: avoid; }
+                        a { color: ${accentCol}; overflow-wrap: anywhere !important; word-break: break-word !important; }
+                        img.spine-strip {
+                            display: block !important;
+                            max-width: 110px !important;
+                            max-height: ${Math.min(340, viewH - 24)}px !important;
+                            width: auto !important; height: auto !important;
+                            margin: 0.6em auto !important;
+                            break-inside: avoid !important;
+                        }
+                        img:not(.spine-strip), svg {
+                            display: block !important;
+                            position: static !important;
+                            max-width: ${colW}px !important;
+                            max-height: ${viewH - 16}px !important;
+                            width: auto !important; height: auto !important;
+                            object-fit: contain !important;
+                            margin: 0.5em auto !important;
+                            break-inside: avoid !important;
+                        }
+                    `;
+                }
+            }
+
+            // 2. COMIC SCROLL (ẨN RUBY + GIỮ ẢNH GÁY NHỎ GỌN)
+            if (currentReadingMode === 'comic') {
                 return `
                     html, body {
                         margin: 0 !important; padding: 0 !important;
                         width: 100% !important; height: auto !important;
                         min-height: 0 !important; overflow: hidden !important;
                         background: transparent !important;
-                        line-height: 0 !important; font-size: 0 !important;
+                        color: ${textCol};
+                        font-family: 'Segoe UI', system-ui, sans-serif;
+                        font-size: 16px; line-height: 1.8;
                     }
+                    rt, rp { display: none !important; }
                     #epub-root {
                         width: 100% !important; margin: 0 !important; padding: 0 !important;
-                        line-height: 0 !important; font-size: 0 !important;
+                        overflow-wrap: anywhere; word-break: break-word;
                     }
-                    .fs, .singlePage, div, p, section, figure {
+                    #epub-root.has-text-content {
+                        background: ${cardBg};
+                        padding: 28px 34px !important;
+                        margin: 12px 0 !important;
+                        border: 1px solid ${borderCol};
+                        border-radius: 10px;
+                        box-sizing: border-box;
+                    }
+                    @media (max-width: 640px) {
+                        #epub-root.has-text-content { padding: 18px 16px !important; }
+                    }
+                    #epub-root:not(.has-text-content) .fs,
+                    #epub-root:not(.has-text-content) .singlePage,
+                    #epub-root:not(.has-text-content) div,
+                    #epub-root:not(.has-text-content) section,
+                    #epub-root:not(.has-text-content) figure {
                         position: static !important; width: 100% !important;
                         height: auto !important; max-height: none !important;
                         margin: 0 !important; padding: 0 !important;
                         overflow: visible !important; transform: none !important;
                     }
-                    img, svg {
+                    img.spine-strip {
+                        display: block !important;
+                        width: auto !important;
+                        max-width: 140px !important;
+                        max-height: 75vh !important;
+                        height: auto !important;
+                        margin: 14px auto !important;
+                    }
+                    img:not(.spine-strip), svg {
                         display: block !important; position: static !important;
                         width: 100% !important; height: auto !important;
                         max-height: none !important; margin: 0 !important; padding: 0 !important;
                         vertical-align: top !important;
                     }
+                    a { color: ${accentCol}; overflow-wrap: anywhere !important; word-break: break-word !important; }
+                    ${pdfOverlayCss}
                 `;
             }
 
-            // Novel mode
+            // 3. NOVEL SCROLL (ẨN RUBY + GIỮ ẢNH GÁY NHỎ GỌN)
             return `
                 html, body {
                     margin: 0 !important; padding: 0 !important;
@@ -822,11 +1539,14 @@
                     writing-mode: horizontal-tb !important;
                     -webkit-writing-mode: horizontal-tb !important;
                 }
+                rt, rp { display: none !important; }
                 #epub-root {
                     padding: 30px 34px;
-                    word-wrap: break-word;
-                    overflow-wrap: break-word;
+                    max-width: 100%;
+                    overflow-wrap: anywhere;
+                    word-break: break-word;
                 }
+                #epub-root.is-pdf-overlay { padding: 0 !important; }
                 @media (max-width: 640px) {
                     #epub-root { padding: 18px 14px; }
                 }
@@ -834,6 +1554,7 @@
                     writing-mode: horizontal-tb !important;
                     -webkit-writing-mode: horizontal-tb !important;
                     box-sizing: border-box;
+                    max-width: 100%;
                 }
                 .fs, .singlePage {
                     position: static !important; width: 100% !important;
@@ -842,36 +1563,106 @@
                 }
                 p { margin: 0 0 0.95em 0; text-align: justify; }
                 h1, h2, h3 { color: ${accentCol}; line-height: 1.4; margin: 1.1em 0 0.55em; }
-                a { color: ${accentCol}; }
-                img, svg {
+                a {
+                    color: ${accentCol};
+                    overflow-wrap: anywhere !important;
+                    word-break: break-word !important;
+                    display: inline;
+                }
+                pre, code { white-space: pre-wrap; overflow-wrap: anywhere; }
+                img.spine-strip {
+                    display: block !important;
+                    width: auto !important;
+                    max-width: 140px !important;
+                    max-height: 75vh !important;
+                    height: auto !important;
+                    margin: 14px auto !important;
+                }
+                img:not(.spine-strip), svg {
                     display: block !important; position: static !important;
                     max-width: 100% !important; height: auto !important;
                     margin: 1em auto !important; border-radius: 6px;
                 }
-                img.singlePage { width: 100% !important; }
-                ruby { ruby-align: center; }
-                rt { font-size: 0.58em; color: ${accentCol}; }
+                img.singlePage:not(.spine-strip) { width: 100% !important; }
+                ${pdfOverlayCss}
             `;
         }
 
         function syncAllIframesStyle() {
-            const baseCss = buildIframeBaseCss();
+            if (isPagedNovel()) {
+                renderNovelPagedChapter(novelPagedState.pageIdx, novelPagedState.subIdx);
+                return;
+            }
             const keepOrig = document.getElementById('chkKeepEpubCss').checked;
-            pages.forEach(p => {
-                if (!p.iframe || !p.iframe.contentDocument) return;
+            activeLoadedIndices.forEach(idx => {
+                const p = pages[idx];
+                if (!p || !p.iframe || !p.iframe.contentDocument) return;
                 const doc = p.iframe.contentDocument;
                 const baseEl = doc.getElementById('reader-base-style');
                 const origEl = doc.getElementById('epub-orig-style');
-                if (baseEl) baseEl.textContent = baseCss;
+                if (baseEl) baseEl.textContent = buildIframeBaseCss(p.iframeOpts || {});
                 if (origEl) origEl.disabled = !keepOrig;
-                if (p.syncHeight) p.syncHeight();
+                if (p.syncHeight && !isPagedMode()) p.syncHeight();
             });
         }
 
         function syncAllIframesHeight() {
-            pages.forEach(p => { if (p.syncHeight) p.syncHeight(); });
+            if (isPagedNovel()) {
+                renderNovelPagedChapter(novelPagedState.pageIdx, novelPagedState.subIdx);
+                return;
+            }
+            if (isPagedMode()) return;
+            activeLoadedIndices.forEach(idx => {
+                const p = pages[idx];
+                if (p && p.syncHeight) p.syncHeight();
+            });
         }
-        window.addEventListener('resize', () => setTimeout(syncAllIframesHeight, 120));
+        window.addEventListener('resize', () => setTimeout(syncAllIframesHeight, 150));
+
+        // ==========================================
+        // REVOKE & GIẢI PHÓNG RAM ĐỘNG
+        // ==========================================
+        function unloadPageSlice(index) {
+            const p = pages[index];
+            if (!p || !p.loaded) return;
+
+            if (p.element && !isPagedMode()) {
+                const h = p.element.getBoundingClientRect().height;
+                if (h > 40) {
+                    p.cachedHeight = Math.ceil(h);
+                    p.element.style.minHeight = p.cachedHeight + 'px';
+                }
+                p.element.innerHTML = '';
+            }
+
+            if (p.resizeObserver) {
+                try { p.resizeObserver.disconnect(); } catch (e) {}
+                p.resizeObserver = null;
+            }
+            p.iframe = null;
+            p.syncHeight = null;
+
+            if (p.pageBlobs && p.pageBlobs.length > 0) {
+                p.pageBlobs.forEach(u => { try { URL.revokeObjectURL(u); } catch (e) {} });
+                p.pageBlobs = [];
+            }
+
+            p.loaded = false;
+            p.loading = false;
+            activeLoadedIndices.delete(index);
+        }
+
+        function pruneDistantPages(centerIndex) {
+            if (activeLoadedIndices.size <= REVOKE_DISTANCE * 2 + 2) return;
+            for (const idx of Array.from(activeLoadedIndices)) {
+                if (Math.abs(idx - centerIndex) > REVOKE_DISTANCE) unloadPageSlice(idx);
+            }
+        }
+
+        function unloadAllActivePages() {
+            for (const idx of Array.from(activeLoadedIndices)) unloadPageSlice(idx);
+            activeLoadedIndices.clear();
+        }
 
         // ==========================================
         // TỌA ĐỘ ĐỘNG TRÊN URL & LOCALSTORAGE
@@ -890,14 +1681,27 @@
             currentPageIndex = pageIdx;
             currentScrollPct = Math.max(0, Math.min(100, Math.round(pct)));
 
-            document.getElementById('currentPage').textContent = pageIdx + 1;
-            document.getElementById('coordPercent').textContent = currentScrollPct + '%';
+            if (isPagedNovel()) {
+                document.getElementById('currentPage').textContent = `${pageIdx + 1}`;
+                document.getElementById('coordPercent').textContent = `${novelPagedState.subIdx + 1}/${novelPagedState.totalSubs}`;
+            } else if (comicA4SubState.active) {
+                document.getElementById('currentPage').textContent = `${pageIdx + 1}`;
+                document.getElementById('coordPercent').textContent = `A4 ${comicA4SubState.subIdx + 1}/${comicA4SubState.urls.length}`;
+            } else if (isPagedComic() && spreads[currentSpreadIdx]?.length === 2) {
+                const sp = spreads[currentSpreadIdx];
+                document.getElementById('currentPage').textContent = `${sp[0] + 1}-${sp[1] + 1}`;
+                document.getElementById('coordPercent').textContent = '';
+            } else {
+                document.getElementById('currentPage').textContent = pageIdx + 1;
+                document.getElementById('coordPercent').textContent = isPagedMode() ? '' : (currentScrollPct + '%');
+            }
+
             if (pages.length > 0) {
                 document.getElementById('progressFill').style.width = (((pageIdx + 1) / pages.length) * 100) + '%';
             }
 
             if (!currentFileName) return;
-            const prefix = currentReadingMode === 'webtoon' ? 'wb' : 'nv';
+            const prefix = currentReadingMode === 'comic' ? 'cm' : 'nv';
             const padPage = String(pageIdx + 1).padStart(3, '0');
             const safeName = encodeURIComponent(currentFileName);
             const newHash = `#${prefix}.${currentBookHash}-${safeName}##${padPage}-${currentScrollPct}%`;
@@ -905,7 +1709,8 @@
             try { history.replaceState(null, '', newHash); } catch (e) {}
 
             const payload = JSON.stringify({
-                page: pageIdx, pct: currentScrollPct, mode: currentReadingMode, ts: Date.now()
+                page: pageIdx, pct: currentScrollPct, mode: currentReadingMode,
+                dir: readDirection, ts: Date.now()
             });
             try {
                 localStorage.setItem(`epub_coord_${currentBookHash}_${currentFileName}`, payload);
@@ -913,13 +1718,14 @@
             } catch (e) {}
 
             highlightActiveToc(pageIdx);
+            pruneDistantPages(pageIdx);
         }
 
         function getSavedCoordinate(hash, fileName) {
-            const m = location.hash.match(/^#(wb|nv)\.([a-f0-9]+)-(.+)##(\d+)-(\d+)%$/i);
+            const m = location.hash.match(/^#(cm|wb|nv)\.([a-f0-9]+)-(.+)##(\d+)-(\d+)%$/i);
             if (m && decodeURIComponent(m[3]) === fileName) {
                 return {
-                    mode: m[1] === 'wb' ? 'webtoon' : 'novel',
+                    mode: m[1] === 'nv' ? 'novel' : 'comic',
                     page: Math.max(0, parseInt(m[4], 10) - 1),
                     pct: parseInt(m[5], 10)
                 };
@@ -927,40 +1733,57 @@
             try {
                 const raw = localStorage.getItem(`epub_coord_${hash}_${fileName}`) ||
                             localStorage.getItem(`epub_coord_name_${fileName}`);
-                if (raw) return JSON.parse(raw);
+                if (raw) {
+                    const obj = JSON.parse(raw);
+                    if (obj.mode === 'webtoon') obj.mode = 'comic';
+                    return obj;
+                }
             } catch (e) {}
             return null;
         }
 
         // ==========================================
-        // CHUYỂN CHẾ ĐỘ ĐỌC (BẢO TOÀN 100% ẢNH & TỌA ĐỘ)
+        // CHUYỂN CHẾ ĐỘ ĐỌC (COMIC <-> NOVEL)
         // ==========================================
         async function switchReadingMode() {
             if (pages.length === 0) return;
             const savedPage = currentPageIndex;
             const savedPct = currentScrollPct;
 
-            currentReadingMode = currentReadingMode === 'webtoon' ? 'novel' : 'webtoon';
-            applyCurrentModeStyles();
+            clearComicA4Cache();
+            unloadAllActivePages();
+            pages.forEach(p => { p.cachedHeight = 0; });
 
-            pages.forEach(p => { p.loaded = false; p.iframe = null; p.syncHeight = null; });
-            loadedPagesSet.clear();
+            currentReadingMode = currentReadingMode === 'comic' ? 'novel' : 'comic';
+            applyCurrentModeStyles();
 
             await createViewer();
             await jumpToPage(savedPage, null, savedPct);
-            showToast(`Chế độ: ${currentReadingMode === 'webtoon' ? '🎨 Webtoon' : '📖 Novel'}`);
+            showToast(`Chế độ: ${currentReadingMode === 'comic' ? '🎨 Comic' : '📖 Novel'}`);
         }
 
         function applyCurrentModeStyles() {
             const btn = document.getElementById('modeSwitchBtn');
             const mainViewer = document.getElementById('mainViewer');
-            if (currentReadingMode === 'webtoon') {
-                btn.textContent = '🎨 Webtoon';
-                mainViewer.classList.remove('novel-mode');
-                mainViewer.classList.add('webtoon-mode');
+            const isComic = currentReadingMode === 'comic';
+            const paged = isPagedMode();
+
+            btn.textContent = isComic ? '🎨 Comic' : '📖 Novel';
+            document.getElementById('btnSpreadToggle').style.display = paged ? 'inline-block' : 'none';
+
+            const dirNames = { scroll: 'Scroll', ltr: 'LTR', rtl: 'RTL' };
+            document.getElementById('readDirLabel').textContent = dirNames[readDirection] || 'Scroll';
+            document.getElementById('btnDirScroll').classList.toggle('active', readDirection === 'scroll');
+            document.getElementById('btnDirLtr').classList.toggle('active', readDirection === 'ltr');
+            document.getElementById('btnDirRtl').classList.toggle('active', readDirection === 'rtl');
+
+            mainViewer.classList.remove('comic-mode', 'novel-mode', 'paged-mode', 'novel-bg');
+            if (paged) {
+                mainViewer.classList.add('paged-mode');
+                if (!isComic) mainViewer.classList.add('novel-bg');
+            } else if (isComic) {
+                mainViewer.classList.add('comic-mode');
             } else {
-                btn.textContent = '📖 Novel';
-                mainViewer.classList.remove('webtoon-mode');
                 mainViewer.classList.add('novel-mode');
             }
         }
@@ -1008,16 +1831,24 @@
             return resolved.join('/');
         }
 
-        async function getCachedBlobUrl(key, entry) {
-            if (blobCache.has(key)) return blobCache.get(key);
+        async function getPersistentBlobUrl(key, entry) {
+            if (persistentAssetCache.has(key)) return persistentAssetCache.get(key);
             if (!entry) return null;
             const blob = await entry.async('blob');
             const url = URL.createObjectURL(blob);
-            blobCache.set(key, url);
+            persistentAssetCache.set(key, url);
             return url;
         }
 
-        // Chuẩn bị CSS gốc (giải mã @font-face sang Blob URL) để đưa RIÊNG vào bên trong Iframe
+        async function createPageBlobUrl(pageObj, entry) {
+            if (!entry) return null;
+            const blob = await entry.async('blob');
+            const url = URL.createObjectURL(blob);
+            if (!pageObj.pageBlobs) pageObj.pageBlobs = [];
+            pageObj.pageBlobs.push(url);
+            return url;
+        }
+
         async function prepareEpubEmbeddedCss(cssPaths) {
             let combined = '';
             for (const cssPath of cssPaths) {
@@ -1033,7 +1864,7 @@
                     const resolved = resolveRelative(cssPath, origUrl);
                     const assetEntry = getZipFileEntry(epubZip, resolved);
                     if (assetEntry) {
-                        const blobUrl = await getCachedBlobUrl(resolved, assetEntry);
+                        const blobUrl = await getPersistentBlobUrl(resolved, assetEntry);
                         if (blobUrl) css = css.split(m[0]).join(`url("${blobUrl}")`);
                     }
                 }
@@ -1043,28 +1874,21 @@
         }
 
         // ==========================================
-        // TẢI THƯ VIỆN GIẢI MÃ MOBI THEO YÊU CẦU
+        // TẢI THƯ VIỆN GIẢI MÃ MOBI TỰ CHỦ
         // ==========================================
         function ensureMobiDecoder() {
             return new Promise((resolve, reject) => {
                 if (typeof window.MobiFile === 'function') return resolve();
-
                 const loadScript = (src, onFail) => {
                     const s = document.createElement('script');
                     s.src = src;
-                    s.onload = () => {
-                        if (typeof window.MobiFile === 'function') resolve();
-                        else onFail();
-                    };
+                    s.onload = () => typeof window.MobiFile === 'function' ? resolve() : onFail();
                     s.onerror = onFail;
                     document.head.appendChild(s);
                 };
-
-                // 1. Ưu tiên nạp ./mobi.js cục bộ (chạy mượt cả offline lẫn GitHub Pages)
                 loadScript('./mobi.js', () => {
-                    // 2. Dự phòng: tự kéo từ chính repo GitHub của bạn nếu mở lẻ file html
                     loadScript('https://cdn.jsdelivr.net/gh/wbcutter/epub-reader@main/mobi.js', () => {
-                        reject(new Error('Không tải được file mobi.js (kiểm tra lại file mobi.js có nằm cùng thư mục index.html không).'));
+                        reject(new Error('Không tải được file mobi.js (kiểm tra lại file mobi.js có nằm cùng thư mục không).'));
                     });
                 });
             });
@@ -1092,7 +1916,7 @@
                         if (tagEnd >= 0) cut = tagEnd + 1;
                     }
                 } else cut = html.length;
-                pages.push({ index: idx++, mobiHtml: html.slice(0, cut), isMobi: true, loaded: false });
+                pages.push({ index: idx++, mobiHtml: html.slice(0, cut), isMobi: true, loaded: false, pageBlobs: [] });
                 html = html.slice(cut);
             }
             if (pages.length === 0) throw new Error('Không đọc được nội dung file MOBI này.');
@@ -1156,11 +1980,13 @@
                 document.getElementById('contentContainer').innerHTML =
                     '<div class="placeholder"><div class="spinner"></div></div>';
 
-                blobCache.forEach(u => URL.revokeObjectURL(u));
-                blobCache.clear();
-                loadedPagesSet.clear();
+                clearComicA4Cache();
+                unloadAllActivePages();
+                persistentAssetCache.forEach(u => { try { URL.revokeObjectURL(u); } catch (e) {} });
+                persistentAssetCache.clear();
                 epubCssText = '';
                 mobiInstance = null;
+                if (pdfDoc) { try { pdfDoc.destroy(); } catch (e) {} pdfDoc = null; }
 
                 pages = [];
                 chapters = [];
@@ -1168,14 +1994,21 @@
                 currentBookHash = computeBookHash(file.name, file.size);
 
                 const savedCoord = getSavedCoordinate(currentBookHash, currentFileName);
+                readDirection = (savedCoord && savedCoord.dir) ? savedCoord.dir : 'scroll';
+
                 const lowerName = file.name.toLowerCase();
 
                 if (lowerName.endsWith('.pdf')) {
                     const ab = await file.arrayBuffer();
-                    pdfDoc = await pdfjsLib.getDocument({ data: ab }).promise;
-                    currentReadingMode = 'webtoon';
+                    pdfDoc = await pdfjsLib.getDocument({
+                        data: ab,
+                        cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+                        cMapPacked: true,
+                        standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/standard_fonts/'
+                    }).promise;
+                    currentReadingMode = (savedCoord && savedCoord.mode) ? savedCoord.mode : 'comic';
                     for (let i = 1; i <= pdfDoc.numPages; i++) {
-                        pages.push({ index: i - 1, pageNum: i, isPdf: true, loaded: false });
+                        pages.push({ index: i - 1, pageNum: i, isPdf: true, loaded: false, pageBlobs: [] });
                     }
                 } else if (/\.(mobi|azw|azw3|prc)$/i.test(lowerName)) {
                     await loadMobiBook(file);
@@ -1193,8 +2026,8 @@
                         if (imgList.length === 0) throw new Error('Không tìm thấy ảnh hoặc nội dung đọc được!');
                         imgList.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 
-                        pages = imgList.map((p, i) => ({ index: i, path: p, isDirectImage: true, loaded: false }));
-                        currentReadingMode = 'webtoon';
+                        pages = imgList.map((p, i) => ({ index: i, path: p, isDirectImage: true, loaded: false, pageBlobs: [] }));
+                        currentReadingMode = 'comic';
                         chapters = buildFolderToc(imgList);
                     } else {
                         const opfInfo = await parseOpfFile(opfPath);
@@ -1217,7 +2050,7 @@
 
                 if (savedCoord && savedCoord.page < pages.length) {
                     await jumpToPage(savedCoord.page, null, savedCoord.pct || 0);
-                    showToast(`Khôi phục: Trang ${savedCoord.page + 1} (${savedCoord.pct || 0}%)`);
+                    showToast(`Khôi phục: Trang ${savedCoord.page + 1}`);
                 } else {
                     updateCoordinateAndUrl(0, 0);
                 }
@@ -1240,7 +2073,7 @@
                 totalChars += txt;
                 if (doc.body?.querySelector('img, svg image, .singlePage') && txt < 80) imgOnly++;
             }
-            if (imgOnly >= 2 || totalChars < 400) return 'webtoon';
+            if (imgOnly >= 2 || totalChars < 400) return 'comic';
             return 'novel';
         }
 
@@ -1287,7 +2120,7 @@
                 const idref = ref.getAttribute('idref');
                 const resolved = manifest.get(idref);
                 if (resolved && !resolved.toLowerCase().includes('kobo-locked')) {
-                    spineOrder.push({ index: idx++, path: resolved, id: idref, isDirectImage: false, loaded: false });
+                    spineOrder.push({ index: idx++, path: resolved, id: idref, isDirectImage: false, loaded: false, pageBlobs: [] });
                 }
             });
             return { spineOrder, cssPaths, navPath, ncxPath };
@@ -1353,30 +2186,58 @@
         }
 
         // ==========================================
-        // RENDER VIEWER & IFRAME CÁCH LY TỪNG TRANG EPUB
+        // RENDER VIEWER: SCROLL vs PAGED
         // ==========================================
         async function createViewer() {
+            if (imageObserver) imageObserver.disconnect();
             const container = document.getElementById('contentContainer');
             container.innerHTML = '';
+
+            if (isPagedMode()) {
+                container.style.width = '100%';
+                container.style.height = '100%';
+                container.style.maxWidth = 'none';
+                container.innerHTML = `
+                    <div class="paged-stage" id="pagedStage">
+                        <div class="tap-zone tap-zone-left" onclick="handlePagedTap('left')"></div>
+                        <div class="tap-zone tap-zone-center ${isPagedNovel() ? '' : 'interactive'}" onclick="handleViewerTap()"></div>
+                        <div class="tap-zone tap-zone-right" onclick="handlePagedTap('right')"></div>
+                        <div class="spread-row" id="spreadRow"></div>
+                    </div>
+                `;
+                attachSwipeEvents(document.getElementById('pagedStage'));
+
+                if (isPagedNovel()) {
+                    await renderNovelPagedChapter(currentPageIndex, 0, false);
+                } else {
+                    buildSpreads();
+                    await renderComicSpread(findSpreadIndexForPage(currentPageIndex));
+                }
+                return;
+            }
+
+            container.style.width = '';
+            container.style.height = '';
+            container.style.maxWidth = '';
 
             for (let i = 0; i < pages.length; i++) {
                 const div = document.createElement('div');
                 div.id = `page-${i}`;
                 div.dataset.index = i;
-                div.className = currentReadingMode === 'webtoon' ? 'webtoon-slice' : 'novel-chapter';
+                div.className = currentReadingMode === 'comic' ? 'comic-slice' : 'novel-chapter';
+                if (pages[i].cachedHeight) div.style.minHeight = pages[i].cachedHeight + 'px';
                 div.innerHTML = '<div class="placeholder"><div class="spinner"></div></div>';
                 container.appendChild(div);
                 pages[i].element = div;
             }
 
-            if (imageObserver) imageObserver.disconnect();
             imageObserver = new IntersectionObserver(entries => {
                 if (isNavigating) return;
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const idx = parseInt(entry.target.dataset.index);
                         loadPageSlice(idx);
-                        for (let o = -2; o <= 3; o++) {
+                        for (let o = -1; o <= 2; o++) {
                             if (idx + o >= 0 && idx + o < pages.length) loadPageSlice(idx + o);
                         }
                     }
@@ -1386,7 +2247,350 @@
             pages.forEach(p => imageObserver.observe(p.element));
         }
 
-        function mountIsolatedIframe(pageObj, bodyHtml, inlineStyles) {
+        // ------------------------------------------
+        // A. COMIC PAGED (LTR / RTL - LUÔN LÀ ẢNH, TEXT CONVERT SANG ẢNH A4)
+        // ------------------------------------------
+        async function getComicImageUrlsForPage(pIdx) {
+            const p = pages[pIdx];
+            if (!p) return [];
+            p.pageBlobs = p.pageBlobs || [];
+            const isRtl = readDirection === 'rtl';
+
+            if (p.isDirectImage) {
+                const entry = getZipFileEntry(epubZip, p.path);
+                const url = await createPageBlobUrl(p, entry);
+                return url ? [url] : [];
+            }
+
+            if (p.isPdf) {
+                const page = await pdfDoc.getPage(p.pageNum);
+                const baseVp = page.getViewport({ scale: 1.0 });
+                const hdScale = calcPdfHdScale(baseVp.width, baseVp.height);
+                const viewport = page.getViewport({ scale: hdScale });
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.round(viewport.width);
+                canvas.height = Math.round(viewport.height);
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+                const url = await new Promise(res => {
+                    canvas.toBlob(b => { canvas.width = 0; canvas.height = 0; res(b ? URL.createObjectURL(b) : null); }, 'image/jpeg', 0.93);
+                });
+                if (url) { p.pageBlobs.push(url); return [url]; }
+                return [];
+            }
+
+            if (p.isMobi) {
+                const doc = parseHtmlSafe(p.mobiHtml);
+                return await convertTextHtmlToA4Images(doc.body, isRtl);
+            }
+
+            const entry = getZipFileEntry(epubZip, p.path);
+            if (!entry) return [];
+            const doc = parseHtmlSafe(await entry.async('string'));
+            const body = doc.body;
+            if (!body) return [];
+
+            body.querySelectorAll('svg image').forEach(svgImg => {
+                const href = svgImg.getAttribute('xlink:href') || svgImg.getAttribute('href');
+                if (href) {
+                    const img = document.createElement('img');
+                    img.setAttribute('src', href);
+                    svgImg.closest('svg')?.replaceWith(img);
+                }
+            });
+
+            const imgs = Array.from(body.querySelectorAll('img'));
+            const textLen = (body.textContent || '').replace(/\s+/g, '').length;
+
+            if (imgs.length > 0 && textLen < 30) {
+                const urls = [];
+                for (const im of imgs) {
+                    const src = im.getAttribute('src');
+                    if (!src) continue;
+                    const fullPath = resolveRelative(p.path, src);
+                    const fileEntry = getZipFileEntry(epubZip, fullPath);
+                    const url = await createPageBlobUrl(p, fileEntry);
+                    if (url) urls.push(url);
+                }
+                if (urls.length > 0) return urls;
+            }
+
+            for (const im of imgs) {
+                const src = im.getAttribute('src');
+                if (!src || /^(data:|https?:|blob:)/i.test(src)) continue;
+                const fullPath = resolveRelative(p.path, src);
+                const fileEntry = getZipFileEntry(epubZip, fullPath);
+                const url = await createPageBlobUrl(p, fileEntry);
+                if (url) im.setAttribute('src', url);
+            }
+            return await convertTextHtmlToA4Images(body, isRtl);
+        }
+
+        function renderComicImagePairToRow(urlsPair) {
+            const row = document.getElementById('spreadRow');
+            if (!row) return;
+            const isDouble = urlsPair.length === 2;
+            const isRtl = readDirection === 'rtl';
+            row.className = `spread-row ${isDouble ? 'double' : 'single'} ${isRtl ? 'rtl' : ''}`;
+            row.innerHTML = '';
+
+            urlsPair.forEach((url, k) => {
+                const slot = document.createElement('div');
+                slot.className = 'spread-slot';
+                if (isDouble) {
+                    const isVisualLeft = (!isRtl && k === 0) || (isRtl && k === 1);
+                    slot.classList.add(isVisualLeft ? 'flush-right' : 'flush-left');
+                }
+                slot.innerHTML = `<img src="${url}" class="comic-paged-img" draggable="false" alt="">`;
+                row.appendChild(slot);
+            });
+        }
+
+        function renderComicA4Spread(subIdx) {
+            const urls = comicA4SubState.urls;
+            if (!urls || urls.length === 0) return;
+            const step = spreadCount === 2 ? 2 : 1;
+            const clamped = Math.max(0, Math.min(urls.length - 1, subIdx));
+            comicA4SubState.subIdx = clamped;
+
+            const pair = [urls[clamped]];
+            if (step === 2 && clamped + 1 < urls.length) pair.push(urls[clamped + 1]);
+            renderComicImagePairToRow(pair);
+            updateCoordinateAndUrl(comicA4SubState.pageIdx, Math.round((clamped / urls.length) * 100));
+        }
+
+        async function renderComicSpread(spreadIdx, startFromEnd = false) {
+            if (spreadIdx < 0 || spreadIdx >= spreads.length) return;
+            const row = document.getElementById('spreadRow');
+            if (!row) return;
+
+            clearComicA4Cache();
+            unloadAllActivePages();
+            currentSpreadIdx = spreadIdx;
+            const pair = spreads[spreadIdx];
+
+            row.className = 'spread-row single';
+            row.innerHTML = '<div class="placeholder"><div class="spinner"></div></div>';
+
+            const firstUrls = await getComicImageUrlsForPage(pair[0]);
+            if (firstUrls.length > 1) {
+                comicA4SubState = {
+                    active: true,
+                    pageIdx: pair[0],
+                    urls: firstUrls,
+                    subIdx: startFromEnd ? Math.max(0, firstUrls.length - (spreadCount === 2 ? 2 : 1)) : 0
+                };
+                renderComicA4Spread(comicA4SubState.subIdx);
+                return;
+            }
+
+            const finalUrls = [];
+            if (firstUrls[0]) finalUrls.push(firstUrls[0]);
+            activeLoadedIndices.add(pair[0]);
+            pages[pair[0]].loaded = true;
+
+            if (pair.length === 2) {
+                const secondUrls = await getComicImageUrlsForPage(pair[1]);
+                if (secondUrls[0]) finalUrls.push(secondUrls[0]);
+                activeLoadedIndices.add(pair[1]);
+                pages[pair[1]].loaded = true;
+            }
+
+            renderComicImagePairToRow(finalUrls);
+            updateCoordinateAndUrl(pair[0], 0);
+        }
+
+        // ------------------------------------------
+        // B. NOVEL PAGED: LTR (2P/1P) & RTL (TATEGAKI KHỚP CỘT TUYỆT ĐỐI)
+        // ------------------------------------------
+        function calcNovelPagedLayout() {
+            const stage = document.getElementById('pagedStage');
+            const sw = (stage?.clientWidth || window.innerWidth) - 24;
+            const sh = (stage?.clientHeight || (window.innerHeight - 90)) - 20;
+            const padX = sw < 640 ? 18 : 34;
+            const padY = sw < 640 ? 18 : 26;
+
+            const maxFrameW = Math.min(sw, 1260);
+            const frameH = Math.max(340, sh);
+            const viewH = frameH - padY * 2;
+            const isRtl = readDirection === 'rtl';
+
+            if (isRtl) {
+                const curEm = parseFloat(document.getElementById('fontSizeSlider').value) || 1.08;
+                const fontSizePx = Math.round(17 * curEm);
+                const lineStep = Math.round(fontSizePx * 2.0);
+                const availW = maxFrameW - padX * 2;
+                const viewW = Math.max(lineStep * 4, Math.floor(availW / lineStep) * lineStep);
+                const frameW = viewW + padX * 2;
+                return { isRtl: true, frameW, frameH, viewW, viewH, fontSizePx, lineStep, hasSpine: false };
+            }
+
+            const isDouble = spreadCount === 2 && maxFrameW >= 720;
+            const gap = isDouble ? 56 : 48;
+            let viewW = maxFrameW - padX * 2;
+            if (isDouble && (viewW - gap) % 2 !== 0) viewW -= 1;
+            const colW = isDouble ? (viewW - gap) / 2 : viewW;
+            const frameW = viewW + padX * 2;
+            return { isRtl: false, isDouble, frameW, frameH, viewW, viewH, colW, gap, stride: viewW + gap, hasSpine: isDouble };
+        }
+
+        async function renderNovelPagedChapter(pageIdx, startSubIdx = 0, goToEnd = false) {
+            if (pageIdx < 0 || pageIdx >= pages.length) return;
+            const row = document.getElementById('spreadRow');
+            if (!row) return;
+
+            unloadAllActivePages();
+            const layout = calcNovelPagedLayout();
+
+            row.className = 'spread-row single';
+            row.innerHTML = `
+                <div class="novel-book-frame ${layout.hasSpine ? 'has-spine' : ''}" style="width:${layout.frameW}px;height:${layout.frameH}px;">
+                    <div class="novel-book-viewport" id="novelBookViewport" style="width:${layout.viewW}px;height:${layout.viewH}px;"></div>
+                </div>
+            `;
+
+            const vpEl = document.getElementById('novelBookViewport');
+            pages[pageIdx].element = vpEl;
+            novelPagedState = {
+                pageIdx, subIdx: 0, totalSubs: 1,
+                stride: layout.stride || layout.viewW,
+                viewW: layout.viewW, maxScroll: 0, isRtl: layout.isRtl
+            };
+
+            await loadPageSlice(pageIdx, {
+                novelPaged: layout,
+                afterNovelPagedReady: (doc) => {
+                    if (layout.isRtl) {
+                        // Căn bù lề cho ảnh/spine thành đúng bội số của lineStep để không bao giờ cắt ngang cột chữ
+                        const snapImagesToGrid = () => {
+                            doc.querySelectorAll('img').forEach(im => {
+                                const w = Math.ceil(im.getBoundingClientRect().width);
+                                if (w > 0) {
+                                    const targetW = Math.ceil((w + 16) / layout.lineStep) * layout.lineStep;
+                                    const extra = Math.max(0, targetW - w);
+                                    const leftM = Math.floor(extra / 2);
+                                    const rightM = extra - leftM;
+                                    im.style.setProperty('margin-left', leftM + 'px', 'important');
+                                    im.style.setProperty('margin-right', rightM + 'px', 'important');
+                                }
+                            });
+                            const sc = doc.getElementById('tate-scroll');
+                            if (!sc) return;
+                            const maxScroll = Math.max(0, sc.scrollWidth - layout.viewW);
+                            const total = Math.max(1, Math.ceil((sc.scrollWidth - 2) / layout.viewW));
+                            novelPagedState.maxScroll = maxScroll;
+                            novelPagedState.totalSubs = total;
+                            novelPagedState.subIdx = goToEnd ? (total - 1) : Math.max(0, Math.min(total - 1, startSubIdx));
+                            applyNovelPagedOffset();
+                            updateCoordinateAndUrl(pageIdx, Math.round((novelPagedState.subIdx / novelPagedState.totalSubs) * 100));
+                        };
+
+                        snapImagesToGrid();
+                        doc.querySelectorAll('img').forEach(im => {
+                            if (!im.complete) im.addEventListener('load', snapImagesToGrid);
+                        });
+                    } else {
+                        const root = doc.getElementById('epub-root');
+                        if (!root) return;
+                        const total = Math.max(1, Math.ceil((root.scrollWidth + layout.gap - 4) / layout.stride));
+                        novelPagedState.totalSubs = total;
+                        novelPagedState.subIdx = goToEnd ? (total - 1) : Math.max(0, Math.min(total - 1, startSubIdx));
+                        applyNovelPagedOffset();
+                        updateCoordinateAndUrl(pageIdx, Math.round((novelPagedState.subIdx / novelPagedState.totalSubs) * 100));
+                    }
+                }
+            });
+        }
+
+        function applyNovelPagedOffset() {
+            const p = pages[novelPagedState.pageIdx];
+            const doc = p?.iframe?.contentDocument;
+            if (!doc) return;
+            if (novelPagedState.isRtl) {
+                const sc = doc.getElementById('tate-scroll');
+                if (sc) {
+                    const target = Math.max(0, novelPagedState.maxScroll - novelPagedState.subIdx * novelPagedState.viewW);
+                    sc.scrollLeft = target;
+                }
+            } else {
+                const root = doc.getElementById('epub-root');
+                if (root) {
+                    root.style.transform = `translateX(-${novelPagedState.subIdx * novelPagedState.stride}px)`;
+                }
+            }
+        }
+
+        async function stepPaged(delta) {
+            if (isPagedNovel()) {
+                const nextSub = novelPagedState.subIdx + delta;
+                if (nextSub >= 0 && nextSub < novelPagedState.totalSubs) {
+                    novelPagedState.subIdx = nextSub;
+                    applyNovelPagedOffset();
+                    updateCoordinateAndUrl(novelPagedState.pageIdx, Math.round((novelPagedState.subIdx / novelPagedState.totalSubs) * 100));
+                } else if (delta > 0) {
+                    if (novelPagedState.pageIdx + 1 < pages.length) await renderNovelPagedChapter(novelPagedState.pageIdx + 1, 0, false);
+                    else showToast('Đã đến trang cuối cùng');
+                } else {
+                    if (novelPagedState.pageIdx - 1 >= 0) await renderNovelPagedChapter(novelPagedState.pageIdx - 1, 0, true);
+                    else showToast('Đang ở trang đầu tiên');
+                }
+                return;
+            }
+
+            if (comicA4SubState.active) {
+                const step = spreadCount === 2 ? 2 : 1;
+                const nextSub = comicA4SubState.subIdx + delta * step;
+                if (nextSub >= 0 && nextSub < comicA4SubState.urls.length) {
+                    renderComicA4Spread(nextSub);
+                    return;
+                }
+                const nextSp = currentSpreadIdx + (delta > 0 ? 1 : -1);
+                if (nextSp < 0) { showToast('Đang ở trang đầu tiên'); return; }
+                if (nextSp >= spreads.length) { showToast('Đã đến trang cuối cùng'); return; }
+                await renderComicSpread(nextSp, delta < 0);
+                return;
+            }
+
+            const next = currentSpreadIdx + delta;
+            if (next < 0) { showToast('Đang ở trang đầu tiên'); return; }
+            if (next >= spreads.length) { showToast('Đã đến trang cuối cùng'); return; }
+            await renderComicSpread(next, delta < 0);
+        }
+
+        function handlePagedTap(side) {
+            if (document.getElementById('settingsPanel').classList.contains('open')) {
+                document.getElementById('settingsPanel').classList.remove('open');
+                return;
+            }
+            const isNext = (readDirection === 'ltr' && side === 'right') || (readDirection === 'rtl' && side === 'left');
+            stepPaged(isNext ? 1 : -1);
+        }
+
+        function attachSwipeEvents(el) {
+            let startX = 0, startY = 0;
+            el.addEventListener('touchstart', e => {
+                if (e.touches.length !== 1) return;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }, { passive: true });
+            el.addEventListener('touchend', e => {
+                if (e.changedTouches.length !== 1) return;
+                const dx = e.changedTouches[0].clientX - startX;
+                const dy = e.changedTouches[0].clientY - startY;
+                if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+                    const swipedLeft = dx < 0;
+                    const isNext = readDirection === 'ltr' ? swipedLeft : !swipedLeft;
+                    stepPaged(isNext ? 1 : -1);
+                }
+            }, { passive: true });
+        }
+
+        // ==========================================
+        // MOUNT IFRAME CÁCH LY + NHẬN DIỆN ẢNH GÁY (SPINE)
+        // ==========================================
+        function mountIsolatedIframe(pageObj, bodyHtml, inlineStyles = '', opts = {}) {
+            const { afterLoadCb = null, novelPaged = null, afterNovelPagedReady = null, rootClass = '' } = opts;
+            pageObj.iframeOpts = { novelPaged };
+
             return new Promise(resolve => {
                 const iframe = document.createElement('iframe');
                 iframe.className = 'epub-frame';
@@ -1395,12 +2599,16 @@
 
                 const keepOrig = document.getElementById('chkKeepEpubCss').checked;
                 const combinedOrigCss = (epubCssText + '\n' + inlineStyles).replace(/<\/style>/gi, '<\\/style>');
-                const baseCss = buildIframeBaseCss().replace(/<\/style>/gi, '<\\/style>');
+                const baseCss = buildIframeBaseCss({ novelPaged }).replace(/<\/style>/gi, '<\\/style>');
+
+                const wrappedBody = (novelPaged && novelPaged.isRtl)
+                    ? `<div id="tate-scroll"><div id="epub-root" class="${rootClass}">${bodyHtml}</div></div>`
+                    : `<div id="epub-root" class="${rootClass}">${bodyHtml}</div>`;
 
                 iframe.srcdoc = `<!DOCTYPE html><html><head><meta charset="UTF-8">
                     <style id="epub-orig-style">${combinedOrigCss}</style>
                     <style id="reader-base-style">${baseCss}</style>
-                </head><body><div id="epub-root">${bodyHtml}</div></body></html>`;
+                </head><body>${wrappedBody}</body></html>`;
 
                 iframe.onload = () => {
                     try {
@@ -1408,27 +2616,78 @@
                         const origEl = doc.getElementById('epub-orig-style');
                         if (origEl) origEl.disabled = !keepOrig;
 
+                        if (typeof afterLoadCb === 'function') afterLoadCb(doc);
+
                         const rootEl = doc.getElementById('epub-root');
                         const syncHeight = () => {
-                            if (!rootEl) return;
+                            if (novelPaged || !rootEl) return;
                             const h = Math.ceil(rootEl.getBoundingClientRect().height);
-                            if (h > 0) iframe.style.height = h + 'px';
+                            if (h > 0) {
+                                iframe.style.height = h + 'px';
+                                pageObj.cachedHeight = h;
+                                if (pageObj.element) pageObj.element.style.minHeight = '';
+                            }
                         };
+
+                        // Tự động gắn class spine-strip cho ảnh gáy (tỷ lệ h > w * 3.0)
+                        const tagSpine = (img) => {
+                            if (isSpineDims(img.naturalWidth, img.naturalHeight)) {
+                                img.classList.add('spine-strip');
+                            }
+                        };
+                        doc.querySelectorAll('img').forEach(img => {
+                            if (img.complete) tagSpine(img);
+                            else img.addEventListener('load', () => { tagSpine(img); syncHeight(); });
+                        });
 
                         pageObj.iframe = iframe;
                         pageObj.syncHeight = syncHeight;
 
-                        // Tự động cập nhật chiều cao khi ảnh nạp xong hoặc đổi độ rộng
-                        if (typeof ResizeObserver !== 'undefined' && rootEl) {
-                            new ResizeObserver(syncHeight).observe(rootEl);
+                        if (novelPaged && typeof afterNovelPagedReady === 'function') {
+                            requestAnimationFrame(() => afterNovelPagedReady(doc));
+                        } else if (!novelPaged) {
+                            if (typeof ResizeObserver !== 'undefined' && rootEl) {
+                                pageObj.resizeObserver = new ResizeObserver(syncHeight);
+                                pageObj.resizeObserver.observe(rootEl);
+                            }
+                            syncHeight();
                         }
-                        doc.querySelectorAll('img').forEach(img => {
-                            if (!img.complete) img.addEventListener('load', syncHeight);
-                        });
-                        syncHeight();
 
-                        // Chuyển tiếp double-click (ẩn/hiện thanh công cụ) & phím tắt ra trang chính
-                        doc.addEventListener('click', handleViewerTap);
+                        doc.addEventListener('click', e => {
+                            const link = e.target.closest('a[href]');
+                            if (link) {
+                                const rawHref = (link.getAttribute('href') || '').trim();
+                                if (!rawHref) return;
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                if (/^(https?:|mailto:|tel:)/i.test(rawHref)) {
+                                    window.open(rawHref, '_blank', 'noopener,noreferrer');
+                                    return;
+                                }
+
+                                const hashPos = rawHref.indexOf('#');
+                                const filePart = hashPos >= 0 ? rawHref.slice(0, hashPos) : rawHref;
+                                const anchorPart = hashPos >= 0 ? decodeURIComponent(rawHref.slice(hashPos + 1)) : null;
+
+                                let targetIdx = -1;
+                                if (!filePart) targetIdx = pageObj.index;
+                                else if (pageObj.path) {
+                                    const resolved = resolveRelative(pageObj.path, filePart).toLowerCase();
+                                    targetIdx = pages.findIndex(p => p.path && p.path.toLowerCase() === resolved);
+                                    if (targetIdx < 0) {
+                                        const fname = resolved.split('/').pop();
+                                        targetIdx = pages.findIndex(p => p.path && p.path.split('/').pop().toLowerCase() === fname);
+                                    }
+                                }
+
+                                if (targetIdx >= 0) jumpToPage(targetIdx, anchorPart, 0);
+                                else showToast('Không tìm thấy vị trí liên kết trong sách');
+                                return;
+                            }
+                            handleViewerTap();
+                        });
+
                         doc.addEventListener('keydown', handleGlobalKeydown);
                     } catch (e) {}
                     resolve();
@@ -1439,68 +2698,112 @@
             });
         }
 
-        async function loadPageSlice(index) {
+        function calcPdfHdScale(baseW, baseH) {
+            const isLandscape = baseW >= baseH;
+            const minW = 1600;
+            const maxW = isLandscape ? 4000 : 3000;
+            const targetW = Math.max(minW, Math.min(maxW, Math.round(baseW * 2.5)));
+            return targetW / baseW;
+        }
+
+        function buildPdfTextLayerHtml(textContent, baseVp) {
+            const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            let spans = '';
+            for (const item of textContent.items) {
+                if (!item.str || !item.transform) continue;
+                const tx = pdfjsLib.Util.transform(baseVp.transform, item.transform);
+                const fontH = Math.hypot(tx[2], tx[3]) || Math.hypot(tx[0], tx[1]) || 12;
+                const leftPct = (tx[4] / baseVp.width) * 100;
+                const topPct = ((tx[5] - fontH * 0.85) / baseVp.height) * 100;
+                const sizeCqi = (fontH / baseVp.width) * 100;
+                spans += `<span style="left:${leftPct.toFixed(3)}%;top:${topPct.toFixed(3)}%;font-size:${sizeCqi.toFixed(3)}cqi;">${esc(item.str)}</span>`;
+            }
+            return spans;
+        }
+
+        async function loadPageSlice(index, renderOpts = {}) {
             const p = pages[index];
-            if (!p || p.loaded || loadedPagesSet.has(index)) return;
-            loadedPagesSet.add(index);
-            p.loaded = true;
+            if (!p || p.loaded || p.loading) return;
+            p.loading = true;
+            p.pageBlobs = p.pageBlobs || [];
+
+            const { novelPaged = null, afterNovelPagedReady = null } = renderOpts;
 
             try {
-                // 1. MOBI
                 if (p.isMobi) {
-                    p.element.classList.add('direct-html');
-                    p.element.innerHTML = p.mobiHtml;
-                    if (mobiInstance && typeof mobiInstance.render_image === 'function') {
-                        const imgs = p.element.getElementsByTagName('IMG');
-                        for (let i = 0; i < imgs.length; i++) {
-                            try { mobiInstance.render_image(imgs, i); } catch (e) {}
+                    await mountIsolatedIframe(p, p.mobiHtml, '', {
+                        novelPaged, afterNovelPagedReady,
+                        rootClass: (currentReadingMode === 'comic') ? 'has-text-content' : '',
+                        afterLoadCb: doc => {
+                            if (mobiInstance && typeof mobiInstance.render_image === 'function') {
+                                const imgs = doc.getElementsByTagName('IMG');
+                                for (let i = 0; i < imgs.length; i++) {
+                                    try { mobiInstance.render_image(imgs, i); } catch (e) {}
+                                }
+                            }
+                        }
+                    });
+                    p.loaded = true; p.loading = false; activeLoadedIndices.add(index);
+                    return;
+                }
+
+                if (p.isPdf) {
+                    const page = await pdfDoc.getPage(p.pageNum);
+                    const baseVp = page.getViewport({ scale: 1.0 });
+                    const hdScale = calcPdfHdScale(baseVp.width, baseVp.height);
+                    const viewport = page.getViewport({ scale: hdScale });
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(viewport.width);
+                    canvas.height = Math.round(viewport.height);
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+
+                    const url = await new Promise(res => {
+                        canvas.toBlob(blob => {
+                            canvas.width = 0; canvas.height = 0;
+                            res(blob ? URL.createObjectURL(blob) : null);
+                        }, 'image/jpeg', 0.93);
+                    });
+
+                    if (url) {
+                        p.pageBlobs.push(url);
+                        if (currentReadingMode === 'novel') {
+                            const textContent = await page.getTextContent();
+                            const textLayerHtml = buildPdfTextLayerHtml(textContent, baseVp);
+                            const html = `
+                                <div class="pdf-page-wrap">
+                                    <img src="${url}" class="pdf-bg-img" alt="Trang ${p.pageNum}" draggable="false">
+                                    <div class="pdf-text-layer">${textLayerHtml}</div>
+                                </div>
+                            `;
+                            await mountIsolatedIframe(p, html, '', { rootClass: 'is-pdf-overlay' });
+                        } else {
+                            await mountIsolatedIframe(p, `<img src="${url}" class="singlePage" alt="Trang ${p.pageNum}">`);
                         }
                     }
+                    p.loaded = true; p.loading = false; activeLoadedIndices.add(index);
                     return;
                 }
 
-                // 2. PDF
-                if (p.isPdf) {
-                    const key = `pdf-${p.pageNum}`;
-                    let url = blobCache.get(key);
-                    if (!url) {
-                        const page = await pdfDoc.getPage(p.pageNum);
-                        const viewport = page.getViewport({ scale: 1.8 });
-                        const canvas = document.createElement('canvas');
-                        canvas.width = viewport.width;
-                        canvas.height = viewport.height;
-                        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-                        url = await new Promise(res => {
-                            canvas.toBlob(blob => {
-                                canvas.width = 0; canvas.height = 0;
-                                res(blob ? URL.createObjectURL(blob) : null);
-                            }, 'image/jpeg', 0.9);
-                        });
-                        if (url) blobCache.set(key, url);
-                    }
-                    if (url) p.element.innerHTML = `<img src="${url}" loading="lazy" alt="Trang ${p.pageNum}">`;
-                    return;
-                }
-
-                // 3. Ảnh trực tiếp (ZIP/CBZ)
                 if (p.isDirectImage) {
                     const entry = getZipFileEntry(epubZip, p.path);
-                    const url = await getCachedBlobUrl(p.path, entry);
-                    if (url) p.element.innerHTML = `<img src="${url}" loading="lazy" alt="Trang ${index + 1}">`;
+                    const url = await createPageBlobUrl(p, entry);
+                    if (url) {
+                        await mountIsolatedIframe(p, `<img src="${url}" class="singlePage" alt="Trang ${index + 1}">`);
+                    }
+                    p.loaded = true; p.loading = false; activeLoadedIndices.add(index);
                     return;
                 }
 
-                // 4. XHTML / HTML trong EPUB -> Nạp qua IFRAME SRCDOC cách ly 100%
                 const entry = getZipFileEntry(epubZip, p.path);
-                if (!entry) return;
+                if (!entry) { p.loading = false; return; }
                 const doc = parseHtmlSafe(await entry.async('string'));
                 const body = doc.body;
-                if (!body) return;
+                if (!body) { p.loading = false; return; }
 
                 let inlineStyles = '';
                 doc.querySelectorAll('style').forEach(st => { inlineStyles += st.textContent + '\n'; });
 
-                // Chuyển <svg><image ...></svg> sang <img>
                 body.querySelectorAll('svg image').forEach(svgImg => {
                     const href = svgImg.getAttribute('xlink:href') || svgImg.getAttribute('href');
                     if (href) {
@@ -1517,12 +2820,17 @@
                     if (!src || /^(data:|https?:|blob:)/i.test(src)) continue;
                     const fullPath = resolveRelative(p.path, src);
                     const fileEntry = getZipFileEntry(epubZip, fullPath);
-                    const url = await getCachedBlobUrl(fullPath, fileEntry);
+                    const url = await createPageBlobUrl(p, fileEntry);
                     if (url) img.setAttribute('src', url);
                 }
 
-                await mountIsolatedIframe(p, body.innerHTML, inlineStyles);
+                const hasText = (body.textContent || '').replace(/\s+/g, '').length > 20;
+                const rootClass = (currentReadingMode === 'comic' && hasText) ? 'has-text-content' : '';
+
+                await mountIsolatedIframe(p, body.innerHTML, inlineStyles, { novelPaged, afterNovelPagedReady, rootClass });
+                p.loaded = true; p.loading = false; activeLoadedIndices.add(index);
             } catch (err) {
+                p.loading = false;
                 console.error(`Lỗi trang ${index}:`, err);
             }
         }
@@ -1585,10 +2893,22 @@
         }
 
         // ==========================================
-        // ĐIỀU HƯỚNG TỌA ĐỘ (HỖ TRỢ ANCHOR BÊN TRONG IFRAME)
+        // ĐIỀU HƯỚNG TỌA ĐỘ
         // ==========================================
         async function jumpToPage(targetIndex, anchor = null, scrollPct = 0) {
             if (targetIndex < 0 || targetIndex >= pages.length) return;
+
+            if (isPagedMode()) {
+                currentPageIndex = targetIndex;
+                if (isPagedNovel()) {
+                    await renderNovelPagedChapter(targetIndex, 0, false);
+                } else {
+                    buildSpreads();
+                    await renderComicSpread(findSpreadIndexForPage(targetIndex));
+                }
+                return;
+            }
+
             navTimers.forEach(t => clearTimeout(t));
             navTimers = [];
             isNavigating = true;
@@ -1615,7 +2935,7 @@
                 doScroll();
                 navTimers.push(setTimeout(() => {
                     doScroll();
-                    for (let i = 1; i <= 3; i++) {
+                    for (let i = 1; i <= 2; i++) {
                         if (targetIndex + i < pages.length) loadPageSlice(targetIndex + i);
                     }
                 }, 100));
@@ -1623,13 +2943,13 @@
                     doScroll();
                     updateCoordinateAndUrl(targetIndex, scrollPct);
                     isNavigating = false;
-                }, 360));
+                }, 380));
             });
         }
 
         let scrollTimer = null;
         document.getElementById('mainViewer').addEventListener('scroll', () => {
-            if (isNavigating || pages.length === 0) return;
+            if (isNavigating || pages.length === 0 || isPagedMode()) return;
             clearTimeout(scrollTimer);
             scrollTimer = setTimeout(() => {
                 const viewer = document.getElementById('mainViewer');
@@ -1663,10 +2983,26 @@
             bd.classList.toggle('visible', open && window.innerWidth <= 768);
         }
 
-        function scrollToTop() { document.getElementById('mainViewer').scrollTo({ top: 0, behavior: 'smooth' }); }
-        function scrollToBottom() {
-            const v = document.getElementById('mainViewer');
-            v.scrollTo({ top: v.scrollHeight, behavior: 'smooth' });
+        function handleFooterPrev() {
+            if (isPagedMode()) stepPaged(-1);
+            else document.getElementById('mainViewer').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function handleFooterNext() {
+            if (isPagedMode()) stepPaged(1);
+            else {
+                const v = document.getElementById('mainViewer');
+                v.scrollTo({ top: v.scrollHeight, behavior: 'smooth' });
+            }
+        }
+
+        function toggleImmersive() {
+            isImmersive = !isImmersive;
+            document.getElementById('header').classList.toggle('hidden', isImmersive);
+            document.getElementById('footer').classList.toggle('hidden', isImmersive);
+            document.getElementById('progressBar').classList.toggle('hidden', isImmersive);
+            document.getElementById('viewerContainer').classList.toggle('immersive', isImmersive);
+            if (isImmersive) document.getElementById('settingsPanel').classList.remove('open');
+            if (isPagedNovel()) setTimeout(() => renderNovelPagedChapter(novelPagedState.pageIdx, novelPagedState.subIdx), 260);
         }
 
         function handleViewerTap() {
@@ -1675,21 +3011,26 @@
                 return;
             }
             const now = Date.now();
-            if (now - lastTap < 280) {
-                isImmersive = !isImmersive;
-                document.getElementById('header').classList.toggle('hidden', isImmersive);
-                document.getElementById('footer').classList.toggle('hidden', isImmersive);
-                document.getElementById('viewerContainer').classList.toggle('immersive', isImmersive);
-            }
+            if (now - lastTap < 300) toggleImmersive();
             lastTap = now;
         }
-        document.getElementById('mainViewer').addEventListener('click', handleViewerTap);
+        document.getElementById('mainViewer').addEventListener('click', () => {
+            if (!isPagedMode()) handleViewerTap();
+        });
 
         function handleGlobalKeydown(e) {
             if (e.target && e.target.tagName === 'INPUT') return;
             if (e.key === 's' || e.key === 'S') { e.preventDefault(); toggleSidebar(); }
-            else if (e.key === 'Home') { e.preventDefault(); scrollToTop(); }
-            else if (e.key === 'End') { e.preventDefault(); scrollToBottom(); }
+            else if (isPagedMode() && e.key === 'ArrowLeft') {
+                e.preventDefault();
+                stepPaged(readDirection === 'ltr' ? -1 : 1);
+            }
+            else if (isPagedMode() && e.key === 'ArrowRight') {
+                e.preventDefault();
+                stepPaged(readDirection === 'ltr' ? 1 : -1);
+            }
+            else if (e.key === 'Home') { e.preventDefault(); handleFooterPrev(); }
+            else if (e.key === 'End') { e.preventDefault(); handleFooterNext(); }
         }
         document.addEventListener('keydown', handleGlobalKeydown);
     </script>
