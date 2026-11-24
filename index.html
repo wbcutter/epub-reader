@@ -960,16 +960,46 @@
             return p && !p.isPdf && !p.isDirectImage;
         }
 
+        function canPairBySpreadSide(p0, p1, isRtl) {
+            const s0 = p0?.spreadSide || null;
+            const s1 = p1?.spreadSide || null;
+            if (s0 === 'center' || s1 === 'center') return false;
+            if (isRtl) {
+                // RTL: trang trước là Phải (right), trang sau là Trái (left)
+                if (s0 === 'left') return false;
+                if (s1 === 'right') return false;
+            } else {
+                // LTR: trang trước là Trái (left), trang sau là Phải (right)
+                if (s0 === 'right') return false;
+                if (s1 === 'left') return false;
+            }
+            return true;
+        }
+
         function buildSpreads() {
             spreads = [];
             if (pages.length === 0) return;
             if (spreadCount === 1) {
                 for (let i = 0; i < pages.length; i++) spreads.push([i]);
-            } else {
-                spreads.push([0]);
-                for (let i = 1; i < pages.length; i += 2) {
-                    if (i + 1 < pages.length) spreads.push([i, i + 1]);
-                    else spreads.push([i]);
+                return;
+            }
+            const isRtl = readDirection === 'rtl';
+            let i = 0;
+            while (i < pages.length) {
+                const p0 = pages[i];
+                const p1 = pages[i + 1];
+                // Cover (index 0) luôn đứng 1 mình nếu không bị ép ghép
+                if (i === 0) {
+                    spreads.push([0]);
+                    i += 1;
+                    continue;
+                }
+                if (p1 && canPairBySpreadSide(p0, p1, isRtl)) {
+                    spreads.push([i, i + 1]);
+                    i += 2;
+                } else {
+                    spreads.push([i]);
+                    i += 1;
                 }
             }
         }
@@ -1397,8 +1427,16 @@
                             object-fit: contain !important;
                             margin: 0 !important;
                         }
+                        /* Icon nhỏ trang trí giữ inline */
+                        img.inline-icon {
+                            display: inline-block !important;
+                            width: auto !important; height: auto !important;
+                            max-height: 1.6em !important; max-width: 1.6em !important;
+                            margin: 0 !important; border: none !important;
+                            vertical-align: middle !important;
+                        }
                         /* Ảnh minh họa thường: khống chế chiều cao, width co theo tỷ lệ & căn giữa */
-                        img:not(.spine-strip), svg {
+                        img:not(.spine-strip):not(.inline-icon), svg {
                             display: inline-block !important;
                             writing-mode: horizontal-tb !important;
                             max-height: ${viewH - 12}px !important;
@@ -1454,7 +1492,14 @@
                             margin: 0.6em auto !important;
                             break-inside: avoid !important;
                         }
-                        img:not(.spine-strip), svg {
+                        img.inline-icon {
+                            display: inline-block !important;
+                            width: auto !important; height: auto !important;
+                            max-height: 1.6em !important;
+                            margin: 0 3px !important; border: none !important;
+                            vertical-align: middle !important;
+                        }
+                        img:not(.spine-strip):not(.inline-icon), svg {
                             display: block !important;
                             position: static !important;
                             max-width: ${colW}px !important;
@@ -1570,20 +1615,39 @@
                     display: inline;
                 }
                 pre, code { white-space: pre-wrap; overflow-wrap: anywhere; }
+                /* Ảnh gáy (spine): đặt sát bên trái, không khung, chữ chảy gọn bên phải rồi tràn xuống dưới */
                 img.spine-strip {
+                    float: left !important;
                     display: block !important;
                     width: auto !important;
-                    max-width: 140px !important;
-                    max-height: 75vh !important;
+                    max-width: 110px !important;
+                    max-height: min(1800px, 85vh) !important;
                     height: auto !important;
-                    margin: 14px auto !important;
+                    margin: 4px 20px 14px 0 !important;
+                    border: none !important;
+                    border-radius: 0 !important;
+                    box-shadow: none !important;
+                    background: transparent !important;
                 }
-                img:not(.spine-strip), svg {
+                /* Icon nhỏ (cánh hoa, họa tiết trang trí): giữ inline theo đúng CSS gốc, không đóng khung */
+                img.inline-icon {
+                    display: inline-block !important;
+                    width: auto !important;
+                    height: auto !important;
+                    max-height: 1.8em !important;
+                    margin: 0 4px !important;
+                    vertical-align: middle !important;
+                    border: none !important;
+                    border-radius: 0 !important;
+                    box-shadow: none !important;
+                }
+                /* Ảnh minh họa lớn bình thường */
+                img:not(.spine-strip):not(.inline-icon), svg {
                     display: block !important; position: static !important;
                     max-width: 100% !important; height: auto !important;
                     margin: 1em auto !important; border-radius: 6px;
                 }
-                img.singlePage:not(.spine-strip) { width: 100% !important; }
+                img.singlePage:not(.spine-strip):not(.inline-icon) { width: 100% !important; }
                 ${pdfOverlayCss}
             `;
         }
@@ -2118,9 +2182,15 @@
             let idx = 0;
             doc.querySelectorAll('spine itemref').forEach(ref => {
                 const idref = ref.getAttribute('idref');
+                const props = (ref.getAttribute('properties') || '').toLowerCase();
+                let spreadSide = null;
+                if (props.includes('page-spread-center')) spreadSide = 'center';
+                else if (props.includes('page-spread-left')) spreadSide = 'left';
+                else if (props.includes('page-spread-right')) spreadSide = 'right';
+
                 const resolved = manifest.get(idref);
                 if (resolved && !resolved.toLowerCase().includes('kobo-locked')) {
-                    spineOrder.push({ index: idx++, path: resolved, id: idref, isDirectImage: false, loaded: false, pageBlobs: [] });
+                    spineOrder.push({ index: idx++, path: resolved, id: idref, spreadSide, isDirectImage: false, loaded: false, pageBlobs: [] });
                 }
             });
             return { spineOrder, cssPaths, navPath, ncxPath };
@@ -2325,15 +2395,29 @@
             return await convertTextHtmlToA4Images(body, isRtl);
         }
 
-        function renderComicImagePairToRow(urlsPair) {
+
+
+        async function renderComicImagePairToRow(urlsPair) {
             const row = document.getElementById('spreadRow');
             if (!row) return;
-            const isDouble = urlsPair.length === 2;
             const isRtl = readDirection === 'rtl';
+
+            // Kiểm tra xem ảnh đầu có phải ảnh ngang (landscape = trang đôi) không
+            let finalPair = urlsPair;
+            if (urlsPair.length === 2) {
+                try {
+                    const im0 = await loadImgObj(urlsPair[0]);
+                    if (im0.naturalWidth > im0.naturalHeight * 1.15) {
+                        finalPair = [urlsPair[0]]; // Ảnh ngang -> hiển thị 1 mình căn giữa
+                    }
+                } catch (_) {}
+            }
+
+            const isDouble = finalPair.length === 2;
             row.className = `spread-row ${isDouble ? 'double' : 'single'} ${isRtl ? 'rtl' : ''}`;
             row.innerHTML = '';
 
-            urlsPair.forEach((url, k) => {
+            finalPair.forEach((url, k) => {
                 const slot = document.createElement('div');
                 slot.className = 'spread-slot';
                 if (isDouble) {
@@ -2344,6 +2428,7 @@
                 row.appendChild(slot);
             });
         }
+
 
         function renderComicA4Spread(subIdx) {
             const urls = comicA4SubState.urls;
@@ -2433,6 +2518,47 @@
             return { isRtl: false, isDouble, frameW, frameH, viewW, viewH, colW, gap, stride: viewW + gap, hasSpine: isDouble };
         }
 
+        // Kiểm tra file .xhtml/.html có phải trang chỉ chứa 1 ảnh minh họa (như p-image) không
+        async function getSingleImageOnlyPageUrl(pIdx) {
+            const p = pages[pIdx];
+            if (!p || p.isPdf || p.isDirectImage || p.isMobi) return null;
+            const entry = getZipFileEntry(epubZip, p.path);
+            if (!entry) return null;
+            const doc = parseHtmlSafe(await entry.async('string'));
+            const body = doc.body;
+            if (!body) return null;
+
+            const textLen = (body.textContent || '').replace(/[\s\u3000\u00A0\uFEFF]/g, '').length;
+            if (textLen > 20) return null;
+
+            let src = null;
+            const img = body.querySelector('img');
+            if (img) src = img.getAttribute('src');
+            else {
+                const svgImg = body.querySelector('svg image');
+                if (svgImg) src = svgImg.getAttribute('xlink:href') || svgImg.getAttribute('href');
+            }
+            if (!src) return null;
+
+            const fullPath = resolveRelative(p.path, src);
+            const fileEntry = getZipFileEntry(epubZip, fullPath);
+            if (!fileEntry) return null;
+
+            const url = await createPageBlobUrl(p, fileEntry);
+            if (!url) return null;
+            try {
+                const im = await loadImgObj(url);
+                return {
+                    url,
+                    w: im.naturalWidth,
+                    h: im.naturalHeight,
+                    isLandscape: im.naturalWidth > im.naturalHeight * 1.15
+                };
+            } catch (_) {
+                return { url, w: 0, h: 0, isLandscape: false };
+            }
+        }
+
         async function renderNovelPagedChapter(pageIdx, startSubIdx = 0, goToEnd = false) {
             if (pageIdx < 0 || pageIdx >= pages.length) return;
             const row = document.getElementById('spreadRow');
@@ -2441,6 +2567,52 @@
             unloadAllActivePages();
             const layout = calcNovelPagedLayout();
 
+            // 1. Ưu tiên kiểm tra nếu đây là trang .xhtml chỉ chứa 1 ảnh minh họa
+            const imgInfo0 = await getSingleImageOnlyPageUrl(pageIdx);
+            if (imgInfo0) {
+                const pair = [imgInfo0.url];
+                let consumed = 1;
+                activeLoadedIndices.add(pageIdx);
+                pages[pageIdx].loaded = true;
+
+                // Nếu là ảnh dọc + đang bật 2P + màn hình đủ rộng + đúng luật spreadSide (OPF) -> ghép trang đôi
+                const canDouble = pageIdx > 0 && spreadCount === 2 && (window.innerWidth >= 720) && !imgInfo0.isLandscape && !isSpineDims(imgInfo0.w, imgInfo0.h);
+                if (canDouble && pageIdx + 1 < pages.length && canPairBySpreadSide(pages[pageIdx], pages[pageIdx + 1], layout.isRtl)) {
+                    const imgInfo1 = await getSingleImageOnlyPageUrl(pageIdx + 1);
+                    if (imgInfo1 && !imgInfo1.isLandscape && !isSpineDims(imgInfo1.w, imgInfo1.h)) {
+                        pair.push(imgInfo1.url);
+                        consumed = 2;
+                        activeLoadedIndices.add(pageIdx + 1);
+                        pages[pageIdx + 1].loaded = true;
+                    }
+                }
+
+                novelPagedState = {
+                    pageIdx, subIdx: 0, totalSubs: 1, consumedPages: consumed,
+                    stride: layout.viewW, viewW: layout.viewW, maxScroll: 0, isRtl: layout.isRtl
+                };
+
+                const isDouble = pair.length === 2;
+                const isRtl = layout.isRtl;
+                row.className = `spread-row ${isDouble ? 'double' : 'single'} ${isRtl ? 'rtl' : ''}`;
+                row.innerHTML = '';
+                pair.forEach((url, k) => {
+                    const slot = document.createElement('div');
+                    slot.className = 'spread-slot';
+                    if (isDouble) {
+                        const isVisualLeft = (!isRtl && k === 0) || (isRtl && k === 1);
+                        slot.classList.add(isVisualLeft ? 'flush-right' : 'flush-left');
+                    }
+                    slot.innerHTML = `<img src="${url}" class="comic-paged-img" draggable="false" alt="">`;
+                    slot.addEventListener('click', handleViewerTap);
+                    row.appendChild(slot);
+                });
+
+                updateCoordinateAndUrl(pageIdx, 0);
+                return;
+            }
+
+            // 2. Trang văn bản bình thường
             row.className = 'spread-row single';
             row.innerHTML = `
                 <div class="novel-book-frame ${layout.hasSpine ? 'has-spine' : ''}" style="width:${layout.frameW}px;height:${layout.frameH}px;">
@@ -2451,7 +2623,7 @@
             const vpEl = document.getElementById('novelBookViewport');
             pages[pageIdx].element = vpEl;
             novelPagedState = {
-                pageIdx, subIdx: 0, totalSubs: 1,
+                pageIdx, subIdx: 0, totalSubs: 1, consumedPages: 1,
                 stride: layout.stride || layout.viewW,
                 viewW: layout.viewW, maxScroll: 0, isRtl: layout.isRtl
             };
@@ -2460,12 +2632,12 @@
                 novelPaged: layout,
                 afterNovelPagedReady: (doc) => {
                     if (layout.isRtl) {
-                        // Căn bù lề cho ảnh/spine thành đúng bội số của lineStep để không bao giờ cắt ngang cột chữ
                         const snapImagesToGrid = () => {
-                            doc.querySelectorAll('img').forEach(im => {
+                            doc.querySelectorAll('img:not(.inline-icon)').forEach(im => {
                                 const w = Math.ceil(im.getBoundingClientRect().width);
                                 if (w > 0) {
-                                    const targetW = Math.ceil((w + 16) / layout.lineStep) * layout.lineStep;
+                                    // Khống chế không bao giờ vượt quá viewW để tránh đẻ ra trang trắng thừa
+                                    const targetW = Math.min(layout.viewW, Math.ceil((w + 8) / layout.lineStep) * layout.lineStep);
                                     const extra = Math.max(0, targetW - w);
                                     const leftM = Math.floor(extra / 2);
                                     const rightM = extra - leftM;
@@ -2476,7 +2648,7 @@
                             const sc = doc.getElementById('tate-scroll');
                             if (!sc) return;
                             const maxScroll = Math.max(0, sc.scrollWidth - layout.viewW);
-                            const total = Math.max(1, Math.ceil((sc.scrollWidth - 2) / layout.viewW));
+                            const total = Math.max(1, Math.ceil((sc.scrollWidth - 8) / layout.viewW));
                             novelPagedState.maxScroll = maxScroll;
                             novelPagedState.totalSubs = total;
                             novelPagedState.subIdx = goToEnd ? (total - 1) : Math.max(0, Math.min(total - 1, startSubIdx));
@@ -2491,7 +2663,7 @@
                     } else {
                         const root = doc.getElementById('epub-root');
                         if (!root) return;
-                        const total = Math.max(1, Math.ceil((root.scrollWidth + layout.gap - 4) / layout.stride));
+                        const total = Math.max(1, Math.ceil((root.scrollWidth + layout.gap - 8) / layout.stride));
                         novelPagedState.totalSubs = total;
                         novelPagedState.subIdx = goToEnd ? (total - 1) : Math.max(0, Math.min(total - 1, startSubIdx));
                         applyNovelPagedOffset();
@@ -2527,11 +2699,22 @@
                     applyNovelPagedOffset();
                     updateCoordinateAndUrl(novelPagedState.pageIdx, Math.round((novelPagedState.subIdx / novelPagedState.totalSubs) * 100));
                 } else if (delta > 0) {
-                    if (novelPagedState.pageIdx + 1 < pages.length) await renderNovelPagedChapter(novelPagedState.pageIdx + 1, 0, false);
-                    else showToast('Đã đến trang cuối cùng');
+                    const step = novelPagedState.consumedPages || 1;
+                    if (novelPagedState.pageIdx + step < pages.length) {
+                        await renderNovelPagedChapter(novelPagedState.pageIdx + step, 0, false);
+                    } else showToast('Đã đến trang cuối cùng');
                 } else {
-                    if (novelPagedState.pageIdx - 1 >= 0) await renderNovelPagedChapter(novelPagedState.pageIdx - 1, 0, true);
-                    else showToast('Đang ở trang đầu tiên');
+                    if (novelPagedState.pageIdx - 1 >= 0) {
+                        let targetPrev = novelPagedState.pageIdx - 1;
+                        if (targetPrev >= 2 && spreadCount === 2 && window.innerWidth >= 720) {
+                            const pPrev1 = await getSingleImageOnlyPageUrl(targetPrev);
+                            const pPrev2 = await getSingleImageOnlyPageUrl(targetPrev - 1);
+                            if (pPrev1 && pPrev2 && canPairBySpreadSide(pages[targetPrev - 1], pages[targetPrev], novelPagedState.isRtl) && !pPrev1.isLandscape && !pPrev2.isLandscape && !isSpineDims(pPrev1.w, pPrev1.h) && !isSpineDims(pPrev2.w, pPrev2.h)) {
+                                targetPrev = targetPrev - 1;
+                            }
+                        }
+                        await renderNovelPagedChapter(targetPrev, 0, true);
+                    } else showToast('Đang ở trang đầu tiên');
                 }
                 return;
             }
@@ -2629,15 +2812,29 @@
                             }
                         };
 
-                        // Tự động gắn class spine-strip cho ảnh gáy (tỷ lệ h > w * 3.0)
-                        const tagSpine = (img) => {
-                            if (isSpineDims(img.naturalWidth, img.naturalHeight)) {
+                        // Lọc khoảng trắng / thẻ p rỗng gây trang trắng khi đọc Tategaki (RTL)
+                        if (novelPaged && novelPaged.isRtl && rootEl) {
+                            rootEl.querySelectorAll('p, div').forEach(el => {
+                                if (el.querySelector('img, svg, picture')) return;
+                                const txt = (el.textContent || '').replace(/[\s\u3000\u00A0\uFEFF]/g, '');
+                                if (!txt) el.remove();
+                            });
+                            rootEl.querySelectorAll('br + br').forEach(br => br.remove());
+                        }
+
+                        // Phân loại ảnh: gáy (spine), icon nhỏ (inline-icon), hay ảnh minh họa thường
+                        const tagImageRole = (img) => {
+                            const w = img.naturalWidth, h = img.naturalHeight;
+                            if (!w || !h) return;
+                            if (isSpineDims(w, h)) {
                                 img.classList.add('spine-strip');
+                            } else if ((w <= 140 && h <= 140) || (h <= 64 && w <= 320)) {
+                                img.classList.add('inline-icon');
                             }
                         };
                         doc.querySelectorAll('img').forEach(img => {
-                            if (img.complete) tagSpine(img);
-                            else img.addEventListener('load', () => { tagSpine(img); syncHeight(); });
+                            if (img.complete) tagImageRole(img);
+                            else img.addEventListener('load', () => { tagImageRole(img); syncHeight(); });
                         });
 
                         pageObj.iframe = iframe;
